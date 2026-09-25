@@ -3144,7 +3144,7 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 93.98) (xy 88.9 93.98)
+			(xy 35.56 93.98) (xy 88.9 93.98)
 		)
 		(stroke
 			(width 0)
@@ -3344,7 +3344,7 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 88.9) (xy 83.82 88.9)
+			(xy 35.56 88.9) (xy 83.82 88.9)
 		)
 		(stroke
 			(width 0)
@@ -3524,7 +3524,7 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 96.52) (xy 88.9 96.52)
+			(xy 35.56 96.52) (xy 88.9 96.52)
 		)
 		(stroke
 			(width 0)
@@ -3934,7 +3934,7 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 91.44) (xy 88.9 91.44)
+			(xy 35.56 91.44) (xy 88.9 91.44)
 		)
 		(stroke
 			(width 0)
@@ -3974,7 +3974,7 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 99.06) (xy 88.9 99.06)
+			(xy 35.56 99.06) (xy 88.9 99.06)
 		)
 		(stroke
 			(width 0)
@@ -4224,7 +4224,7 @@
 	)
 	(hierarchical_label "NFC_NSS"
 		(shape input)
-		(at 80.01 88.9 180)
+		(at 35.56 88.9 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4235,7 +4235,7 @@
 	)
 	(hierarchical_label "NFC_MOSI"
 		(shape input)
-		(at 80.01 93.98 180)
+		(at 35.56 93.98 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4246,7 +4246,7 @@
 	)
 	(hierarchical_label "NFC_SCK"
 		(shape input)
-		(at 80.01 96.52 180)
+		(at 35.56 96.52 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4257,7 +4257,7 @@
 	)
 	(hierarchical_label "NFC_IRQ"
 		(shape output)
-		(at 80.01 99.06 180)
+		(at 35.56 99.06 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4268,7 +4268,7 @@
 	)
 	(hierarchical_label "NFC_MISO"
 		(shape output)
-		(at 80.01 91.44 180)
+		(at 35.56 91.44 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4276,88 +4276,6 @@
 			(justify right)
 		)
 		(uuid "f2852236-7d87-4097-9dc0-55c0716f69ce")
-	)
-	(symbol
-		(lib_id "Device:FerriteBead")
-		(at 147.32 69.85 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "08f0578e-6bee-4aec-961d-1c030a5df048")
-		(property "Reference" "FB2"
-			(at 151.13 68.5291 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "600 Ohm @ 100MHz"
-			(at 151.13 71.0691 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Package_LCC:PLCC-84_29.3x29.3mm_P1.27mm"
-			(at 145.542 69.85 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 147.32 69.85 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Ferrite bead"
-			(at 147.32 69.85 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "ab8b9641-7b9d-44ab-84cc-6fc0abe07a3f")
-		)
-		(pin "1"
-			(uuid "73be37a3-af13-441b-8313-900e086ad27a")
-		)
-		(instances
-			(project "Attendance Management System"
-				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
-					(reference "FB2")
-					(unit 1)
-				)
-			)
-		)
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -4393,7 +4311,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 216.8652 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -4553,7 +4471,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 64.4652 109.22 0)
 			(hide yes)
 			(show_name no)
@@ -4596,6 +4514,82 @@
 			(project "Attendance Management System"
 				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
 					(reference "C9")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x01_Pin")
+		(at 78.74 124.46 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0e7ccdce-3ac8-42e0-aa98-c16bcd484519")
+		(property "Reference" "J5"
+			(at 77.216 124.968 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "CS01"
+			(at 78.486 123.19 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_Wire:SolderWirePad_1x01_SMD_1x2mm"
+			(at 78.74 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 78.74 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x01, script generated"
+			(at 78.74 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "0079fab6-1374-4dce-8bc5-f4f5b9595add")
+		)
+		(instances
+			(project "Attendance Management System"
+				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
+					(reference "J5")
 					(unit 1)
 				)
 			)
@@ -4713,7 +4707,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 227.0252 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -4795,7 +4789,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 227.0252 55.88 0)
 			(hide yes)
 			(show_name no)
@@ -4956,7 +4950,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 197.8152 127 0)
 			(hide yes)
 			(show_name no)
@@ -5116,7 +5110,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 257.5052 57.15 0)
 			(hide yes)
 			(show_name no)
@@ -5159,83 +5153,6 @@
 			(project "Attendance Management System"
 				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
 					(reference "C32")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Conn_01x01_Pin")
-		(at 78.74 124.46 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "47581964-6c0f-4bc2-b1e3-cfdf6911799a")
-		(property "Reference" "Pad_CSO1"
-			(at 81.788 121.412 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "Conn_01x01_Pin"
-			(at 79.375 121.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 78.74 124.46 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 78.74 124.46 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Generic connector, single row, 01x01, script generated"
-			(at 78.74 124.46 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "71f02a00-6e06-4a78-a891-727928496298")
-		)
-		(instances
-			(project "Attendance Management System"
-				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
-					(reference "Pad_CSO1")
 					(unit 1)
 				)
 			)
@@ -5353,7 +5270,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_DFN_QFN:DFN-8-1EP_2x3mm_P0.5mm_EP0.61x2.2mm"
+		(property "Footprint" ""
 			(at 233.68 111.76 0)
 			(hide yes)
 			(show_name no)
@@ -5432,7 +5349,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 247.3452 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -5514,7 +5431,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 257.5052 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -5674,7 +5591,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 216.8652 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -5912,7 +5829,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 171.1452 87.63 0)
 			(hide yes)
 			(show_name no)
@@ -5992,7 +5909,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 154.94 137.4648 0)
 			(hide yes)
 			(show_name no)
@@ -6041,83 +5958,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 86.36 106.68 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "6fd4fe9b-dcc6-4023-af47-456b7e789945")
-		(property "Reference" "#PWR048"
-			(at 86.36 113.03 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 82.55 108.458 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "ST25R3916-AQWT:QFN50P500X500X100-33N"
-			(at 86.36 106.68 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 86.36 106.68 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 86.36 106.68 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "39bbebc3-1dda-40b1-baa1-0a001277f451")
-		)
-		(instances
-			(project "Attendance Management System"
-				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
-					(reference "#PWR048")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:R")
 		(at 83.82 73.66 0)
 		(unit 1)
@@ -6151,7 +5991,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_QFP:LQFP-32_7x7mm_P0.8mm"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 82.042 73.66 90)
 			(hide yes)
 			(show_name no)
@@ -6233,7 +6073,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_QFP:LQFP-32_7x7mm_P0.8mm"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 225.552 130.81 90)
 			(hide yes)
 			(show_name no)
@@ -6313,7 +6153,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_QFP:LQFP-32_7x7mm_P0.8mm"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 163.83 140.208 90)
 			(hide yes)
 			(show_name no)
@@ -6440,6 +6280,84 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 86.36 106.68 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "877bec6f-a516-41b1-b541-e6e533da56a5")
+		(property "Reference" "#PWR068"
+			(at 86.36 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 86.36 111.76 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 86.36 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 86.36 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 86.36 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "7d029297-3403-4f8c-8d5b-42d37000fef4")
+		)
+		(instances
+			(project "Attendance Management System"
+				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
+					(reference "#PWR068")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:C")
 		(at 246.38 53.34 0)
 		(unit 1)
@@ -6473,7 +6391,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 247.3452 57.15 0)
 			(hide yes)
 			(show_name no)
@@ -6553,7 +6471,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ST25R3916-AQWT:QFN50P500X500X100-33N"
+		(property "Footprint" "External:QFN50P500X500X100-33N"
 			(at 109.22 109.22 0)
 			(hide yes)
 			(show_name no)
@@ -7258,7 +7176,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 215.5952 127 0)
 			(hide yes)
 			(show_name no)
@@ -7301,83 +7219,6 @@
 			(project "Attendance Management System"
 				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
 					(reference "C18")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Conn_01x01_Pin")
-		(at 78.74 127 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "91a96ea4-aecb-4db5-a8e9-9b2e696765e8")
-		(property "Reference" "Pad_CSI1"
-			(at 81.788 129.032 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "Conn_01x01_Pin"
-			(at 79.375 124.46 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 78.74 127 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 78.74 127 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Generic connector, single row, 01x01, script generated"
-			(at 78.74 127 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "a53d1032-d4da-47f1-9071-26c056812dff")
-		)
-		(instances
-			(project "Attendance Management System"
-				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
-					(reference "Pad_CSI1")
 					(unit 1)
 				)
 			)
@@ -7495,7 +7336,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 197.8152 154.94 0)
 			(hide yes)
 			(show_name no)
@@ -7577,7 +7418,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 64.4652 133.35 0)
 			(hide yes)
 			(show_name no)
@@ -7704,86 +7545,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:L")
-		(at 189.23 116.84 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "a2f2cbdc-d88a-4687-b21b-508fa1787b43")
-		(property "Reference" "L1"
-			(at 189.23 111.76 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470 nH"
-			(at 189.23 114.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm"
-			(at 189.23 116.84 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 189.23 116.84 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Inductor"
-			(at 189.23 116.84 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "f80f6dfd-569b-44ca-98df-6983f9479d1f")
-		)
-		(pin "1"
-			(uuid "598f6969-ae89-41a0-9d15-163765cc375d")
-		)
-		(instances
-			(project "Attendance Management System"
-				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
-					(reference "L1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
 		(at 214.63 154.94 0)
 		(unit 1)
@@ -7895,7 +7656,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 227.0252 91.44 0)
 			(hide yes)
 			(show_name no)
@@ -7975,7 +7736,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 154.94 123.4948 0)
 			(hide yes)
 			(show_name no)
@@ -8135,7 +7896,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 247.3452 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -8295,7 +8056,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 216.8652 55.88 0)
 			(hide yes)
 			(show_name no)
@@ -8455,7 +8216,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 215.5952 154.94 0)
 			(hide yes)
 			(show_name no)
@@ -8498,6 +8259,167 @@
 			(project "Attendance Management System"
 				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
 					(reference "C19")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:FerriteBead")
+		(at 147.32 69.85 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d2539be7-c318-4608-9b7e-99c956480e07")
+		(property "Reference" "FB2"
+			(at 151.13 68.6307 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "FB 600 Ohm @ 100MHz"
+			(at 151.13 71.1707 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Inductor_SMD:L_0402_1005Metric"
+			(at 149.098 69.85 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 147.32 69.85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Ferrite bead"
+			(at 147.32 69.85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2f0c5aa2-d919-4efa-8a50-3ca590ae0454")
+		)
+		(pin "2"
+			(uuid "96e7311e-4206-44ac-a0e7-10383f8962da")
+		)
+		(instances
+			(project "Attendance Management System"
+				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
+					(reference "FB2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:L")
+		(at 189.23 116.84 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "d455fa46-dd05-4edd-9ffe-70989cb9f8ff")
+		(property "Reference" "L3"
+			(at 189.23 111.76 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470n"
+			(at 189.484 114.808 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Inductor_SMD:L_0402_1005Metric"
+			(at 189.23 116.84 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 189.23 116.84 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Inductor"
+			(at 189.23 116.84 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "10e2f19a-2224-4ed2-a59f-d41d3c8801b2")
+		)
+		(pin "1"
+			(uuid "06cd6323-23a6-4ac3-87a9-e4c326aa4d0f")
+		)
+		(instances
+			(project "Attendance Management System"
+				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
+					(reference "L3")
 					(unit 1)
 				)
 			)
@@ -8582,6 +8504,82 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector:Conn_01x01_Pin")
+		(at 78.74 127 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "da51241a-1805-427c-a7e6-7fdbffa2eff9")
+		(property "Reference" "J6"
+			(at 76.962 127 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "CSI1"
+			(at 78.994 128.778 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_Wire:SolderWirePad_1x01_SMD_1x2mm"
+			(at 78.74 127 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 78.74 127 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x01, script generated"
+			(at 78.74 127 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "cc025d92-ef05-4727-84f9-c33437fb59fc")
+		)
+		(instances
+			(project "Attendance Management System"
+				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
+					(reference "J6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:C")
 		(at 226.06 35.56 0)
 		(unit 1)
@@ -8615,7 +8613,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 227.0252 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -8697,7 +8695,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 257.5052 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -8777,7 +8775,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_QFP:LQFP-32_7x7mm_P0.8mm"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 163.83 126.238 90)
 			(hide yes)
 			(show_name no)
@@ -8913,9 +8911,8 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "f23f8c08-5130-444c-8474-013a6d2a84c0")
-		(property "Reference" "L2"
+		(uuid "ef3ae807-43e3-44f4-a4dc-98ce19101ca3")
+		(property "Reference" "L4"
 			(at 189.23 139.7 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8925,8 +8922,8 @@
 				)
 			)
 		)
-		(property "Value" "470 nH"
-			(at 189.23 142.24 90)
+		(property "Value" "470n"
+			(at 189.484 142.748 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8935,7 +8932,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm"
+		(property "Footprint" "Inductor_SMD:L_0402_1005Metric"
 			(at 189.23 144.78 0)
 			(hide yes)
 			(show_name no)
@@ -8969,15 +8966,124 @@
 			)
 		)
 		(pin "2"
-			(uuid "da067c53-3abb-4cc9-a163-fb440c6a9e5f")
+			(uuid "5fddfef1-5091-478d-b1c0-67aba56a5b2f")
 		)
 		(pin "1"
-			(uuid "dcd140e9-fbdb-44a1-89ef-9eeb3746017e")
+			(uuid "502cd0e9-7545-4068-9bec-de4a36c22aa5")
 		)
 		(instances
 			(project "Attendance Management System"
 				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
-					(reference "L2")
+					(reference "L4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:Crystal_GND24")
+		(at 63.5 118.11 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f1257c39-7cf1-49bd-8e09-099938ee902f")
+		(property "Reference" "Y1"
+			(at 68.58 116.8399 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "ABM8-27.120MHZ"
+			(at 38.608 115.062 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm_HandSoldering"
+			(at 63.5 118.11 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 63.5 118.11 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Four pin crystal, GND on pins 2 and 4"
+			(at 63.5 118.11 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property private "KLC_S3.3" "The rectangle is not a symbol body but a graphical element"
+			(at 50.8 118.11 0)
+			(hide yes)
+			(show_name yes)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property private "KLC_S4.1" "Some pins are on 50mil grid to make the symbol small"
+			(at 48.26 118.11 0)
+			(hide yes)
+			(show_name yes)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3e0a5b29-2be1-40ef-9d2f-2c47a5d82287")
+		)
+		(pin "4"
+			(uuid "b0ec651c-9df8-48cc-b69b-5162f1d1b6f1")
+		)
+		(pin "3"
+			(uuid "7bbe9735-59c7-4abc-8cb4-4675b3db3063")
+		)
+		(pin "2"
+			(uuid "200d4a7d-f02e-4834-a8ff-5712c45905e6")
+		)
+		(instances
+			(project "Attendance Management System"
+				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
+					(reference "Y1")
 					(unit 1)
 				)
 			)
@@ -9017,7 +9123,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 216.8652 91.44 0)
 			(hide yes)
 			(show_name no)
@@ -9097,7 +9203,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 201.93 145.7452 0)
 			(hide yes)
 			(show_name no)
@@ -9177,7 +9283,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 201.93 117.8052 0)
 			(hide yes)
 			(show_name no)
@@ -9220,115 +9326,6 @@
 			(project "Attendance Management System"
 				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
 					(reference "C16")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:Crystal_GND24")
-		(at 63.5 118.11 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "fd2eef5b-b1f8-4672-8737-84c44f3605ed")
-		(property "Reference" "Y1"
-			(at 46.99 116.84 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "27.120 MHz"
-			(at 41.91 119.634 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Oscillator:Oscillator_DIP-14"
-			(at 63.5 118.11 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 63.5 118.11 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Four pin crystal, GND on pins 2 and 4"
-			(at 63.5 118.11 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property private "KLC_S3.3" "The rectangle is not a symbol body but a graphical element"
-			(at 50.8 118.11 0)
-			(hide yes)
-			(show_name yes)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property private "KLC_S4.1" "Some pins are on 50mil grid to make the symbol small"
-			(at 48.26 118.11 0)
-			(hide yes)
-			(show_name yes)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "007d9e75-8a2b-43b8-b33a-ca07078a4766")
-		)
-		(pin "2"
-			(uuid "065233b3-77c7-4a0d-b629-e87cb12dd201")
-		)
-		(pin "3"
-			(uuid "780409b2-1404-4e1c-91b1-a60a4d37d3c7")
-		)
-		(pin "4"
-			(uuid "c445efdb-902b-4803-8b0c-fb61661fbdc3")
-		)
-		(instances
-			(project "Attendance Management System"
-				(path "/7913fd27-5946-47b8-84cf-c21ab2f68a0e/c8797de9-443e-4542-ab6c-38920db86e79"
-					(reference "Y1")
 					(unit 1)
 				)
 			)
