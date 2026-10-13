@@ -7,6 +7,8 @@ name: Companion installers
 
 on:
   push:
+    # Naming tags without branches would limit pushes to tags; paths are not checked for tags.
+    branches: ["**"]
     paths:
       - "Companion/**"
       - ".github/workflows/companion-installers.yml"
