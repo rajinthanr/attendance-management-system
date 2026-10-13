@@ -12,6 +12,10 @@ on:
       - ".github/workflows/companion-installers.yml"
     tags:
       - "companion-v*"
+  pull_request:
+    paths:
+      - "Companion/**"
+      - ".github/workflows/companion-installers.yml"
   workflow_dispatch:
 
 permissions:
