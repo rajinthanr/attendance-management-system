@@ -47,15 +47,25 @@ def dot(colour, r=7):
             f'<circle cx="{r+1}" cy="{r+1}" r="{r}" fill="{colour}"/></svg>')
 
 # ---------------------------------------------------------------- device drawings
-# Board coordinates in mm from Enclosure/enclosure.py (x right, y up from the USB edge).
-BOARD_W, BOARD_H, WALL = 60.0, 88.6, 3.0
+# Lid top face, from Enclosure/enclosure.py: board coordinates in mm (x right, y up from the
+# USB edge); the case is the board outline grown by GAP 0.4 + WALL 2.2 (corner radius 4.6).
+BOARD_W, BOARD_H, WALL = 60.0, 88.5, 2.6
+CASE_R = 4.6
 S = 3.1  # px per mm
 CW, CH = (BOARD_W + 2 * WALL) * S, (BOARD_H + 2 * WALL) * S
-TAP = (29.5, 68.5, 40.0, 30.0)      # tap area centre and size
-LED_G, LED_R = (12.5, 15.74), (15.0, 15.74)
-BTN = (4.5, 6.0)
-CHG = [(39.0, 2.5), (41.5, 2.5), (44.0, 2.5)]
+ANT = (29.5, 68.5, 40.0, 30.0)      # NFC loop centre and size (ANTENNA)
+TAP = ANT
+LED_G, LED_R = (12.5, 15.74), (15.0, 15.74)              # STATUS_LEDS: D6 green, D5 red
+BTN = (4.5, 6.0)                                         # SW_POWER
+PINS = [(12.0, 6.0), (19.5, 6.0)]                        # SW_BOOT0, SW_RESET guide tubes
+CHG = [(39.0, 2.5), (41.5, 2.5), (44.0, 2.5)]            # CHARGE_LEDS: STAT1 red, STAT2 green, PG green
+MOUNTS = [(4.25, 84.25), (55.75, 84.25), (4.25, 38.25), (55.75, 4.25)]
 USB_X = 30.04
+TAB, TAB_SLOT = (0.6, 1.0, 9.0, 22.0), 0.6               # POWER flexure tab: x0, y0 (free end), x1, y1 (hinge)
+RING_R = 3.6                                             # BUTTON_RING_R
+LED_BORE, PIN_BORE, SCREW_D, CSK_D = 1.9, 1.6, 3.4, 6.6
+MARK = "#3d3b37"                                         # the inlay's second colour
+HOLE = "#5f5c55"
 
 
 def X(x):
@@ -66,12 +76,44 @@ def Y(y):
     return (BOARD_H - y + WALL) * S
 
 
-def power_symbol(cx, cy, r, colour=INK):
-    return (f'<path d="M {cx - r*0.62:.1f} {cy - r*0.55:.1f} A {r*0.82:.1f} {r*0.82:.1f} 0 1 0 '
-            f'{cx + r*0.62:.1f} {cy - r*0.55:.1f}" fill="none" stroke="{colour}" stroke-width="2" '
-            f'stroke-linecap="round"/>'
-            f'<line x1="{cx}" y1="{cy - r*0.95:.1f}" x2="{cx}" y2="{cy - r*0.15:.1f}" stroke="{colour}" '
-            f'stroke-width="2" stroke-linecap="round"/>')
+def P(cx, cy, r, deg):
+    import math
+    a = math.radians(deg)
+    return X(cx + r * math.cos(a)), Y(cy + r * math.sin(a))
+
+
+def arc_path(cx, cy, r, a0, a1, w, colour, large=0):
+    """Arc of radius r (mm) from a0 to a1 degrees, counter-clockwise with y up, round ends."""
+    x0, y0 = P(cx, cy, r, a0)
+    x1, y1 = P(cx, cy, r, a1)
+    return (f'<path d="M {x0:.1f} {y0:.1f} A {r*S:.1f} {r*S:.1f} 0 {large} 0 {x1:.1f} {y1:.1f}" fill="none" '
+            f'stroke="{colour}" stroke-width="{w*S:.1f}" stroke-linecap="round"/>')
+
+
+def power_mark(colour=MARK):
+    """enclosure.py button_marks(): power symbol (arc r 2.3, gap at the top, bar up) in a ring."""
+    cx, cy = BTN
+    return (arc_path(cx, cy, 2.3, 120, 420, 0.8, colour, large=1)
+            + f'<line x1="{X(cx):.1f}" y1="{Y(cy):.1f}" x2="{X(cx):.1f}" y2="{Y(cy + 2.3):.1f}" stroke="{colour}" '
+              f'stroke-width="{0.8*S:.1f}" stroke-linecap="round"/>'
+            + f'<circle cx="{X(cx):.1f}" cy="{Y(cy):.1f}" r="{RING_R*S:.1f}" fill="none" stroke="{colour}" '
+              f'stroke-width="{0.6*S:.1f}"/>')
+
+
+def tap_mark(colour=MARK):
+    """enclosure.py tap_graphic(): a frame round the loop, a dot with three waves, 'TAP CARD'."""
+    ax, ay, aw, al = ANT
+    w, l = aw + 4, al + 2
+    out = [f'<rect x="{X(ax - w/2 + 0.6):.1f}" y="{Y(ay + l/2 - 0.6):.1f}" width="{(w - 1.2)*S:.1f}" '
+           f'height="{(l - 1.2)*S:.1f}" rx="{3.4*S:.1f}" fill="none" stroke="{colour}" stroke-width="{1.2*S:.1f}"/>']
+    wx, wy = ax, ay - 3.0
+    out.append(f'<circle cx="{X(wx):.1f}" cy="{Y(wy):.1f}" r="{1.6*S:.1f}" fill="{colour}"/>')
+    for r in (4.5, 8.0, 11.5):
+        out.append(arc_path(wx, wy, r, 45, 135, 1.6, colour))
+    out.append(f'<text x="{X(ax):.1f}" y="{Y(ay - 9.5) + 2.2*S:.1f}" text-anchor="middle" '
+               f'font-family="DejaVu Sans, Inter, Arial" font-weight="700" font-size="{6.0*S:.1f}" '
+               f'fill="{colour}">TAP CARD</text>')
+    return "".join(out)
 
 
 def glow(cx, cy, colour, r=7):
@@ -81,43 +123,40 @@ def glow(cx, cy, colour, r=7):
 
 
 def case_body(lit=None, charge=None, dim=False, waves=True):
-    """The case, seen from the top. lit: 'green' / 'red' / None; charge: 'red' / 'green' / None."""
-    g = [f'<rect x="0" y="0" width="{CW:.0f}" height="{CH:.0f}" rx="22" fill="{CASE}" '
+    """The lid, seen from the top. lit: 'green' / 'red' / None; charge: 'red' / 'green' / None.
+    With lit None and not dim, the two light holes are tinted so a reader can tell them apart."""
+    g = [f'<rect x="0" y="0" width="{CW:.0f}" height="{CH:.0f}" rx="{CASE_R*S:.0f}" fill="{CASE}" '
          f'stroke="{CASE_EDGE}" stroke-width="2"/>']
-    ax, ay, aw, ah = TAP
-    g.append(f'<rect x="{X(ax - aw/2):.0f}" y="{Y(ay + ah/2):.0f}" width="{aw*S:.0f}" height="{ah*S:.0f}" '
-             f'rx="12" fill="#f6f4ef" stroke="{ACCENT}" stroke-width="2.5" stroke-dasharray="7 5"/>')
-    if waves:
-        cx, cy = X(ax), Y(ay)
-        for k in (1, 2, 3):
-            g.append(f'<path d="M {cx - 6 + k*9:.0f} {cy - 8 - k*7:.0f} q {6 + k*3} {8 + k*7} 0 {16 + k*14}" '
-                     f'fill="none" stroke="{ACCENT}" stroke-width="2.4" stroke-linecap="round" '
-                     f'opacity="{1 - k*0.22:.2f}"/>')
-        g.append(f'<text x="{cx - 12:.0f}" y="{cy + 6:.0f}" text-anchor="end" font-size="17" '
-                 f'font-weight="700" fill="{ACCENT}">TAP</text>')
-    for mx, my in [(4.25, 84.25), (55.75, 84.25), (4.25, 38.25), (55.75, 4.25)]:
-        g.append(f'<circle cx="{X(mx):.0f}" cy="{Y(my):.0f}" r="{2.6*S:.0f}" fill="#d8d4cb" stroke="{CASE_EDGE}"/>')
-    off = "#c9c5bc"
+    g.append(tap_mark())
+    for mx, my in MOUNTS:
+        g.append(f'<circle cx="{X(mx):.1f}" cy="{Y(my):.1f}" r="{CSK_D/2*S:.1f}" fill="#d8d4cb" stroke="{CASE_EDGE}"/>'
+                 f'<circle cx="{X(mx):.1f}" cy="{Y(my):.1f}" r="{SCREW_D/2*S:.1f}" fill="#9a968d"/>')
+    # POWER: the U-shaped slot round the flexure tab, open at the hinge end
+    tx0, ty0, tx1, ty1 = TAB
+    gs = TAB_SLOT
+    for x0, y0, x1, y1 in [(tx0 - gs, ty0, tx0, ty1), (tx1, ty0, tx1 + gs, ty1), (tx0 - gs, ty0 - gs, tx1 + gs, ty0)]:
+        g.append(f'<rect x="{X(x0):.1f}" y="{Y(y1):.1f}" width="{(x1 - x0)*S:.1f}" height="{(y1 - y0)*S:.1f}" fill="{HOLE}"/>')
+    g.append(power_mark())
     plain = lit is None and not dim
-    g.append(f'<circle cx="{X(LED_G[0]):.0f}" cy="{Y(LED_G[1]):.0f}" r="5" fill="{GREEN if plain else off}"/>')
-    g.append(f'<circle cx="{X(LED_R[0]):.0f}" cy="{Y(LED_R[1]):.0f}" r="5" fill="{RED if plain else off}"/>')
+    g.append(f'<circle cx="{X(LED_G[0]):.1f}" cy="{Y(LED_G[1]):.1f}" r="{LED_BORE/2*S + (1.5 if plain else 0):.1f}" '
+             f'fill="{GREEN if plain else HOLE}"/>')
+    g.append(f'<circle cx="{X(LED_R[0]):.1f}" cy="{Y(LED_R[1]):.1f}" r="{LED_BORE/2*S + (1.5 if plain else 0):.1f}" '
+             f'fill="{RED if plain else HOLE}"/>')
     if lit == "green":
         g.append(glow(X(LED_G[0]), Y(LED_G[1]), GREEN))
     elif lit == "red":
         g.append(glow(X(LED_R[0]), Y(LED_R[1]), RED))
-    px, py = X(BTN[0]), Y(BTN[1])
-    g.append(f'<circle cx="{px:.0f}" cy="{py:.0f}" r="{3.6*S:.0f}" fill="#fbfaf7" stroke="{INK}" stroke-width="2"/>')
-    g.append(power_symbol(px, py + 2, 7))
-    for sx in (12.0, 19.5):
-        g.append(f'<circle cx="{X(sx):.0f}" cy="{Y(6.0):.0f}" r="3" fill="#8d897f"/>')
+    for px_, py_ in PINS:
+        g.append(f'<circle cx="{X(px_):.1f}" cy="{Y(py_):.1f}" r="{PIN_BORE/2*S:.1f}" fill="{HOLE}"/>')
     for i, (cx_, cy_) in enumerate(CHG):
         if charge == "red" and i == 0:
             g.append(glow(X(cx_), Y(cy_), RED, 3.5))
         elif charge == "green" and i == 1:
             g.append(glow(X(cx_), Y(cy_), GREEN, 3.5))
         else:
-            g.append(f'<circle cx="{X(cx_):.0f}" cy="{Y(cy_):.0f}" r="3.2" fill="{off}"/>')
-    g.append(f'<rect x="{X(USB_X) - 15:.0f}" y="{CH - 9:.0f}" width="30" height="12" rx="6" fill="#55524c"/>')
+            g.append(f'<circle cx="{X(cx_):.1f}" cy="{Y(cy_):.1f}" r="{LED_BORE/2*S:.1f}" fill="{HOLE}"/>')
+    g.append(f'<rect x="{X(USB_X) - 9.6/2*S:.0f}" y="{CH - 2.2*S:.0f}" width="{9.6*S:.0f}" height="{2.2*S + 2:.0f}" '
+             f'rx="3" fill="#55524c"/>')
     return "".join(g)
 
 
@@ -198,7 +237,7 @@ def device_labelled():
                 f'<text y="{ty:.0f}" text-anchor="{anchor}" class="dl" dominant-baseline="middle">{spans}</text>')
     labels = "".join([
         lab(X(ax + aw/2) - 4, Y(ay), CW + 30, Y(ay), "<tspan class='b'>Tap card here</tspan>", "start"),
-        lab(gx, gy, -30, gy - 40, "<tspan class='b'>Lights</tspan>|green / red", "end"),
+        lab(gx - 7, gy - 4, -30, gy - 40, "<tspan class='b'>Lights</tspan>|green / red", "end"),
         lab(px - 3.6*S, py, -30, py, "<tspan class='b'>Power button</tspan>", "end"),
         lab(X(12.0), Y(6.0) + 3, -30, CH + 32, "Small holes:|do not press", "end"),
         lab(X(44.0) + 3, Y(2.5), CW + 30, Y(2.5) - 30, "<tspan class='b'>Charging lights</tspan>", "start"),
@@ -239,6 +278,10 @@ def shot(name, crop=None, marks=(), boxes=()):
             f'<image href="data:image/png;base64,{data}" width="{w}" height="{h}"/>{over}</svg>')
 
 # ---------------------------------------------------------------- page parts
+
+def T(text):
+    return f'<span class="t">{text}</span>'
+
 
 def card(pic, title, line="", signal=""):
     sig = f'<div class="sig">{signal}</div>' if signal else ""
@@ -282,8 +325,10 @@ svg.shot {{ display: block; width: 100%; height: auto; border: 1px solid #d6d4cc
 .g4 {{ grid-template-columns: repeat(4, 1fr); }}
 .card {{ background: #f5f4f0; border-radius: 12px; padding: 3mm 3mm 3.5mm; text-align: center; }}
 .card .pic {{ height: 48mm; }}
-.g4 .card .pic {{ height: 40mm; }}
-.short .card .pic {{ height: 34mm; }}
+.g4 .card .pic {{ height: 33mm; }}
+.short .card .pic {{ height: 29mm; }}
+.short .card {{ padding: 2.5mm 2.5mm 3mm; }}
+.sig .t {{ margin-left: 2px; }}
 .card p {{ color: {MUTED}; font-size: 11pt; }}
 .sig {{ display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 2mm; min-height: 18px; font-size: 10pt; color: {MUTED}; }}
 .flow {{ display: flex; align-items: stretch; gap: 1.5mm; }}
@@ -326,20 +371,23 @@ def page1():
 def page2():
     return f'''<div class="page">
 <h2>Lights and buzzes</h2>
-<div class="grid g3">
+<div class="grid g3 short">
+ {card(mini(lit="green"), "Ready", "Waiting for cards", dot(GREEN, 5) + T("short flash every 5 s"))}
  {card(mini(lit="green", card=True, buzzing=True), "Marked present", "OK. Next student.", dot(GREEN) + buzz(1))}
- {card(mini(card=True, buzzing=True), "Already marked", "Not counted again.", buzz(2))}
+ {card(mini(lit="green", card=True, buzzing=True), "Already marked", "Not counted again.", dot(GREEN) + dot(GREEN) + buzz(2) + T("2 flashes"))}
  {card(mini(lit="green", buzzing=True), "New lecture", "Students can tap now.", dot(GREEN) + buzz(3))}
- {card(mini(lit="red"), "Battery low", "Please charge it.", "".join(dot(RED, 5) for _ in range(5)) + "&nbsp;5 blinks")}
- {card(mini(lit="red", buzzing=True), "Memory full", "Connect to the computer.", dot(RED) + buzz(4))}
- {card(mini(lit="red"), "Not working", "Unplug. Try again.", dot(RED, 5) * 3 + "&nbsp;fast, non-stop")}
+ {card(mini(lit="red"), "Battery low", "Please charge it.", dot(RED, 5) * 5 + T("5 blinks"))}
+ {card(mini(lit="red", buzzing=True), "Memory full", "Connect to the computer.", dot(RED, 5) * 4 + buzz(4))}
+ {card(mini(lit="green", cable=True), "On the computer", "Not taking attendance", dot(GREEN, 5) + T("flash every second"))}
+ {card(mini(lit="red", cable=True, buzzing=True), "Settings refused", "Start the lecture again.", dot(RED) + buzz(3))}
+ {card(mini(lit="red"), "Not working", "Unplug. Try again.", dot(RED, 5) * 3 + T("fast, non-stop"))}
 </div>
 <h2>Power button</h2>
 <div class="grid g4">
- {card(mini(lit="green", press=True), "Press", "Switch ON")}
- {card(mini(lit="green", press=True, badge="tap"), "Quick press", "Battery check")}
- {card(mini(lit="green", press=True, badge="2 s"), "Hold 2 s", "Next lecture")}
- {card(mini(lit="red", press=True, badge="5 s"), "Hold 5 s", "Switch OFF")}
+ {card(mini(lit="green", press=True), "Press", "Switch ON", dot(GREEN) + buzz(1))}
+ {card(mini(lit="green", press=True, badge="tap"), "Quick press", "Battery OK", dot(GREEN, 5) * 2 + T("2 blinks"))}
+ {card(mini(lit="green", press=True, badge="2 s"), "Hold 2 s, let go", "Next lecture", buzz(1) + T("then") + dot(GREEN) + buzz(3))}
+ {card(mini(lit="red", press=True, badge="5 s"), "Hold 5 s", "Switch OFF", dot(RED) + buzz(1, long=True))}
 </div>
 </div>'''
 
@@ -350,7 +398,7 @@ def page3():
 <div class="grid g3">
  {card(mini(cable=True, charge="red"), "Red = charging", "Any USB-C phone charger")}
  {card(mini(cable=True, charge="green"), "Green = full", "Lasts many months")}
- {card(mini(dim=True, sleep=True, badge="3 min"), "Sleeps by itself", "Press to wake. Records are safe.")}
+ {card(mini(lit="red", sleep=True, badge="3 min", buzzing=True), "Switches off by itself", "After 3 min with no tap. Records are safe.", dot(RED) + buzz(1, long=True))}
 </div>
 <h2>See who came</h2>
 <div class="flow">
@@ -368,7 +416,6 @@ def page3():
  {ARROW}
  {step(3, mini(cable=True, lit="green", card=True), "Now students<br>can tap")}
 </div>
-<div class="note">While the device shows in the app, a tap is <b>not</b> attendance. It is only for adding cards.</div>
 </div>'''
 
 

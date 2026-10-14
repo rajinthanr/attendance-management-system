@@ -60,11 +60,13 @@ explains the app in full.
    | Result | Feedback |
    |---|---|
    | Tap recorded | green LED and one short buzz |
-   | Duplicate | two short buzzes |
+   | Duplicate | green flashes twice, with a short buzz each |
    | New lecture started (button hold) | green and three quick buzzes |
-   | Battery low | red blinks five times |
-   | Log full, or reader fault | red and four buzzes |
+   | Battery low | red blinks five times (and the idle flash turns red) |
+   | Log full, or reader fault | red flashes four times, with a buzz each |
    | Settings applied / refused | green and two buzzes / red and three buzzes |
+   | Waiting for cards | a 10 ms green flash every 5 s (red when the battery is low) |
+   | Plugged into a computer | a green flash every second |
 
 4. **Logging.** Taps go to a RAM buffer, then to flash within 5 seconds. The log
    holds 6,858 records and survives a power cut. When it is full, new taps are

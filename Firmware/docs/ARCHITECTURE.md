@@ -308,8 +308,8 @@ is not a duplicate is recorded:
 | Tap | Feedback |
 |---|---|
 | new card | green and one short buzz (`FB_ACCEPTED`), recorded |
-| duplicate | two short buzzes, not recorded |
-| log full | red ×4 (`FB_ERROR`), not recorded |
+| duplicate | green flashed twice with two short buzzes (`FB_DUPLICATE`), not recorded |
+| log full | red flashed four times, a buzz each (`FB_ERROR`), not recorded |
 | any card during a USB session | green and one short buzz (`FB_ACCEPTED`), shown in `LASTCARD.TXT`, not recorded |
 
 A low battery still overrides all of these. Names, student numbers, departments,
@@ -449,7 +449,7 @@ Three layers, cheapest first:
    microseconds. A stamp from the future (the clock was set backwards) counts as
    just now.
 
-A duplicate buzzes twice, records nothing, and counts in `scans_duplicate`.
+A duplicate flashes green and buzzes twice, records nothing, and counts in `scans_duplicate`.
 Starting the next lecture resets layer 3 for everyone, because the new header is
 where the scan stops.
 

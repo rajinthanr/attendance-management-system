@@ -17,11 +17,11 @@ Tap a card on the reader. The device answers:
 | You see | It means |
 |---|---|
 | green light and one short buzz | the tap is recorded |
-| two short buzzes | this card is already recorded in this lecture (or was read twice in a row); not recorded again |
+| green light flashing twice, with two short buzzes | this card is already recorded in this lecture (or was read twice in a row); not recorded again |
 | green light and three quick buzzes | a new lecture has started (you held the button, see below) |
 | red light blinking five times | the battery is low |
 | red light blinking fast without stopping, no buzz, nothing else works | the device could not start (most often its clock crystal). Unplug the USB cable and disconnect the battery for a few seconds, then try again; if it keeps happening, the board needs looking at |
-| red light and four buzzes | the device's memory is full and the tap was not recorded (or, at switch-on, its reader did not start) |
+| red light flashing four times, with a buzz each time | the device's memory is full and the tap was not recorded (or, at switch-on, its reader did not start) |
 
 Every card is recorded, registered or not: the device keeps no list of students
 and shows green for every new tap. Who the card belongs to is worked out later,
