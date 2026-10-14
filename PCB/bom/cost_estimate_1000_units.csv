@@ -1,0 +1,48 @@
+﻿Designators,Value,Qty/board,LCSC #,Price at qty-1/min lot (USD),Est. price @1000 boards (USD),Cost per board (USD),Cost for 1000 boards (USD),Basis
+"C1, C4",4.7u,2,C1779,0.0348,0.0191,0.038,38,est. 55% of qty-1 price
+"C10, C11",8.2p,2,C1840,0.0110,0.0060,0.012,12,est. 55% of qty-1 price
+"C12, C13",15p,2,C107110,0.0095,0.0052,0.010,10,est. 55% of qty-1 price
+"C14, C15, C19, C20",150p,4,C107111,0.0081,0.0045,0.018,18,est. 55% of qty-1 price
+"C16, C17",10p,2,C107107,0.0184,0.0101,0.020,20,est. 55% of qty-1 price
+"C18, C27, C28, C29, C3, C30, C33, C34, C35, C5, C6, C7",100n,12,C49678,0.0192,0.0106,0.127,127,est. 55% of qty-1 price
+"C2, C25, C26",10u,3,C15850,0.0798,0.0439,0.132,132,est. 55% of qty-1 price
+"C21, C22",68p,2,C107120,0.0101,0.0056,0.011,11,est. 55% of qty-1 price
+"C23, C24",270p,2,C107106,0.0160,0.0088,0.018,18,est. 55% of qty-1 price
+"C31, C32, C36, C37",2.2u,4,C377773,0.0536,0.0295,0.118,118,est. 55% of qty-1 price
+"C38, C9",1u,2,C28323,0.0403,0.0222,0.044,44,est. 55% of qty-1 price
+C8,10n,1,C1710,0.0116,0.0064,0.006,6,est. 55% of qty-1 price
+"D1, D2, D6",GREEN,3,C98221,0.0315,0.0173,0.052,52,est. 55% of qty-1 price
+"D3, D5",RED,2,C84256,0.0135,0.0074,0.015,15,est. 55% of qty-1 price
+D4,SS14,1,C2480,0.0192,0.0106,0.011,11,est. 55% of qty-1 price
+"FB1, FB2",600R@100MHz,2,C76884,0.0099,0.0054,0.011,11,est. 55% of qty-1 price
+J1,USB-C,1,C5143397,1.4914,1.0000,1.000,1000,estimate
+J2,BATTERY,1,C263753,0.0764,0.0535,0.053,53,est. 70% of qty-1 price
+J3,PN532,1,C42431840,0.1130,0.0791,0.079,79,est. 70% of qty-1 price
+J4,VIB_MOTOR,1,C492401,0.0184,0.0129,0.013,13,est. 70% of qty-1 price
+J5,SWD,1,C2691448,0.0276,0.0193,0.019,19,est. 70% of qty-1 price
+J6,CSO,1,,0.0000,0.0000,0.000,0,"PCB pad, no part"
+J7,CSI,1,,0.0000,0.0000,0.000,0,"PCB pad, no part"
+"L1, L2",470nH,2,C337959,0.1242,0.0683,0.137,137,est. 55% of qty-1 price
+Q1,AO3400A,1,C20917,0.0853,0.0600,0.060,60,estimate
+"R1, R2",5.1k,2,C27834,0.0056,0.0031,0.006,6,est. 55% of qty-1 price
+"R10, R7, R9",4.7M,3,C17674,0.0030,0.0017,0.005,5,est. 55% of qty-1 price
+"R11, R12, R13, R16, R17",10k,5,C17414,0.0039,0.0021,0.011,11,est. 55% of qty-1 price
+"R14, R15, R3, R4, R5",470R,5,C17710,0.0049,0.0027,0.013,13,est. 55% of qty-1 price
+R18,1.5k,1,C4310,0.0035,0.0019,0.002,2,est. 55% of qty-1 price
+"R19, R20",0,2,C17477,0.0045,0.0025,0.005,5,est. 55% of qty-1 price
+R6,1k,1,C17513,0.0041,0.0023,0.002,2,est. 55% of qty-1 price
+R8,2.7M,1,C17531,0.0048,0.0026,0.003,3,est. 55% of qty-1 price
+SW1,RST,1,C2689642,0.2615,0.1830,0.183,183,est. 70% of qty-1 price
+SW2,BOOT0,1,C2689642,0.2615,0.1830,0.183,183,est. 70% of qty-1 price
+SW3,POWER,1,C2689642,0.2615,0.1830,0.183,183,est. 70% of qty-1 price
+TH1,10k NTC,1,C141588,0.6261,0.3500,0.350,350,estimate
+U1,USBLC6-2SC6,1,C7519,0.1778,0.1200,0.120,120,estimate
+U2,MCP73833-xxx-UN,1,C627668,1.9017,1.3000,1.300,1300,estimate
+U3,TPS7A0233PDBVR,1,C2887324,0.5665,0.4500,0.450,450,estimate
+U4,"STM32L432KBU6 (128 kB, as in production/bom.csv)",1,C2928224,,2.1000,2.100,2100,"ST store $2.26 @1k-10k, LCSC C94784 $1.975 @980+; firmware must be re-laid-out for 128 kB (see notes)"
+U5,ST25R3916-AQWT,1,C2908147,5.4546,3.7000,3.700,3700,"DigiKey $4.09 @1k (B variant), Future $3.27 @4k"
+Y1,32.768k,1,C95361,0.2032,0.1422,0.142,142,est. 70% of qty-1 price
+Y2,27.12MHz,1,C29975,0.1106,0.0774,0.077,77,est. 70% of qty-1 price
+
+
+TOTAL PARTS,,,,12.18,,10.84,10839,
