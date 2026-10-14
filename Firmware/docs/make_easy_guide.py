@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
-"""Build Firmware/docs/Attendance_Logger_Easy_Guide.pdf: a short, picture-led guide
-for lecturers, in plain words. The device drawing uses the hole positions in
-Enclosure/enclosure.py; the lights and buzzes follow App/Src/feedback.c.
+"""Build Firmware/docs/Attendance_Logger_Easy_Guide.pdf: a short, picture-led guide for
+lecturers, few words, many drawings. The device drawing uses the hole positions in
+Enclosure/enclosure.py; the lights and buzzes follow App/Src/feedback.c. The app
+pictures are guide_img/app_*.png, taken by app_screenshots.py from the demo data.
 
     python3 make_easy_guide.py            (needs google-chrome or chromium)
 """
 import base64
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[1]
 OUT = HERE / "Attendance_Logger_Easy_Guide.pdf"
-APP_SHOT = ROOT / "Slides" / "src" / "img" / "app_lectures.png"
+IMG = HERE / "guide_img"
 
 GREEN = "#1fa855"
 RED = "#d93434"
@@ -24,17 +25,13 @@ MUTED = "#5b5a55"
 CASE = "#e9e6df"
 CASE_EDGE = "#a9a59b"
 ACCENT = "#2a5bd7"
+SKIN = "#f0c8a4"
+SKIN_EDGE = "#c4946c"
 
 # ---------------------------------------------------------------- small icons
 
-def led(colour, r=9):
-    return (f'<svg width="{2*r+2}" height="{2*r+2}" viewBox="0 0 {2*r+2} {2*r+2}">'
-            f'<circle cx="{r+1}" cy="{r+1}" r="{r}" fill="{colour}"/>'
-            f'<circle cx="{r-2}" cy="{r-2}" r="{r/3:.1f}" fill="#fff" opacity=".45"/></svg>')
-
-
 def buzz(n=1, long=False):
-    """n buzz marks: little wavy lines."""
+    """n buzz marks (little zig-zags)."""
     w = 30 if long else 18
     parts, x = [], 2
     for _ in range(n):
@@ -45,17 +42,20 @@ def buzz(n=1, long=False):
     return f'<svg width="{x}" height="18" viewBox="0 0 {x} 18">{"".join(parts)}</svg>'
 
 
-def blinks(colour, n):
-    return "".join(led(colour, 6) for _ in range(n))
+def dot(colour, r=7):
+    return (f'<svg width="{2*r+2}" height="{2*r+2}" viewBox="0 0 {2*r+2} {2*r+2}">'
+            f'<circle cx="{r+1}" cy="{r+1}" r="{r}" fill="{colour}"/></svg>')
 
-
-def signal(*parts):
-    return f'<div class="sig">{"".join(parts)}</div>'
-
-# ---------------------------------------------------------------- device drawing
+# ---------------------------------------------------------------- device drawings
 # Board coordinates in mm from Enclosure/enclosure.py (x right, y up from the USB edge).
 BOARD_W, BOARD_H, WALL = 60.0, 88.6, 3.0
 S = 3.1  # px per mm
+CW, CH = (BOARD_W + 2 * WALL) * S, (BOARD_H + 2 * WALL) * S
+TAP = (29.5, 68.5, 40.0, 30.0)      # tap area centre and size
+LED_G, LED_R = (12.5, 15.74), (15.0, 15.74)
+BTN = (4.5, 6.0)
+CHG = [(39.0, 2.5), (41.5, 2.5), (44.0, 2.5)]
+USB_X = 30.04
 
 
 def X(x):
@@ -66,342 +66,404 @@ def Y(y):
     return (BOARD_H - y + WALL) * S
 
 
-def power_symbol(cx, cy, r):
+def power_symbol(cx, cy, r, colour=INK):
     return (f'<path d="M {cx - r*0.62:.1f} {cy - r*0.55:.1f} A {r*0.82:.1f} {r*0.82:.1f} 0 1 0 '
-            f'{cx + r*0.62:.1f} {cy - r*0.55:.1f}" fill="none" stroke="{INK}" stroke-width="2" '
+            f'{cx + r*0.62:.1f} {cy - r*0.55:.1f}" fill="none" stroke="{colour}" stroke-width="2" '
             f'stroke-linecap="round"/>'
-            f'<line x1="{cx}" y1="{cy - r*0.95:.1f}" x2="{cx}" y2="{cy - r*0.15:.1f}" stroke="{INK}" '
+            f'<line x1="{cx}" y1="{cy - r*0.95:.1f}" x2="{cx}" y2="{cy - r*0.15:.1f}" stroke="{colour}" '
             f'stroke-width="2" stroke-linecap="round"/>')
 
 
-def device_top(labels=True, card=False):
-    w, h = (BOARD_W + 2 * WALL) * S, (BOARD_H + 2 * WALL) * S
-    pad_l, pad_r, pad_t, pad_b = (205, 215, 10, 60) if labels else (10, 10, 10, 10)
-    W, H = w + pad_l + pad_r, h + pad_t + pad_b
-    g = [f'<rect x="0" y="0" width="{w:.0f}" height="{h:.0f}" rx="22" fill="{CASE}" '
+def glow(cx, cy, colour, r=7):
+    return (f'<circle cx="{cx:.0f}" cy="{cy:.0f}" r="{r*3.2:.0f}" fill="{colour}" opacity=".18"/>'
+            f'<circle cx="{cx:.0f}" cy="{cy:.0f}" r="{r*2:.0f}" fill="{colour}" opacity=".3"/>'
+            f'<circle cx="{cx:.0f}" cy="{cy:.0f}" r="{r}" fill="{colour}"/>')
+
+
+def case_body(lit=None, charge=None, dim=False, waves=True):
+    """The case, seen from the top. lit: 'green' / 'red' / None; charge: 'red' / 'green' / None."""
+    g = [f'<rect x="0" y="0" width="{CW:.0f}" height="{CH:.0f}" rx="22" fill="{CASE}" '
          f'stroke="{CASE_EDGE}" stroke-width="2"/>']
-    # tap area
-    ax, ay, aw, ah = 29.5, 68.5, 40.0, 30.0
+    ax, ay, aw, ah = TAP
     g.append(f'<rect x="{X(ax - aw/2):.0f}" y="{Y(ay + ah/2):.0f}" width="{aw*S:.0f}" height="{ah*S:.0f}" '
              f'rx="12" fill="#f6f4ef" stroke="{ACCENT}" stroke-width="2.5" stroke-dasharray="7 5"/>')
-    cx, cy = X(ax), Y(ay)
-    for k in (1, 2, 3):   # contactless waves
-        g.append(f'<path d="M {cx - 6 + k*9:.0f} {cy - 8 - k*7:.0f} q {6 + k*3} {8 + k*7} 0 {16 + k*14}" '
-                 f'fill="none" stroke="{ACCENT}" stroke-width="2.4" stroke-linecap="round" opacity="{1 - k*0.22:.2f}"/>')
-    g.append(f'<text x="{cx - 12:.0f}" y="{cy + 5:.0f}" text-anchor="end" class="dl b" fill="{ACCENT}">TAP</text>')
-    # holes: mounting screws
+    if waves:
+        cx, cy = X(ax), Y(ay)
+        for k in (1, 2, 3):
+            g.append(f'<path d="M {cx - 6 + k*9:.0f} {cy - 8 - k*7:.0f} q {6 + k*3} {8 + k*7} 0 {16 + k*14}" '
+                     f'fill="none" stroke="{ACCENT}" stroke-width="2.4" stroke-linecap="round" '
+                     f'opacity="{1 - k*0.22:.2f}"/>')
+        g.append(f'<text x="{cx - 12:.0f}" y="{cy + 6:.0f}" text-anchor="end" font-size="17" '
+                 f'font-weight="700" fill="{ACCENT}">TAP</text>')
     for mx, my in [(4.25, 84.25), (55.75, 84.25), (4.25, 38.25), (55.75, 4.25)]:
         g.append(f'<circle cx="{X(mx):.0f}" cy="{Y(my):.0f}" r="{2.6*S:.0f}" fill="#d8d4cb" stroke="{CASE_EDGE}"/>')
-    # status lights
-    gx, gy = X(12.5), Y(15.74)
-    rx_, ry = X(15.0), Y(15.74)
-    g.append(f'<circle cx="{gx:.0f}" cy="{gy:.0f}" r="5" fill="{GREEN}"/>')
-    g.append(f'<circle cx="{rx_:.0f}" cy="{ry:.0f}" r="5" fill="{RED}"/>')
-    # power button
-    px, py = X(4.5), Y(6.0)
+    off = "#c9c5bc"
+    plain = lit is None and not dim
+    g.append(f'<circle cx="{X(LED_G[0]):.0f}" cy="{Y(LED_G[1]):.0f}" r="5" fill="{GREEN if plain else off}"/>')
+    g.append(f'<circle cx="{X(LED_R[0]):.0f}" cy="{Y(LED_R[1]):.0f}" r="5" fill="{RED if plain else off}"/>')
+    if lit == "green":
+        g.append(glow(X(LED_G[0]), Y(LED_G[1]), GREEN))
+    elif lit == "red":
+        g.append(glow(X(LED_R[0]), Y(LED_R[1]), RED))
+    px, py = X(BTN[0]), Y(BTN[1])
     g.append(f'<circle cx="{px:.0f}" cy="{py:.0f}" r="{3.6*S:.0f}" fill="#fbfaf7" stroke="{INK}" stroke-width="2"/>')
     g.append(power_symbol(px, py + 2, 7))
-    # service holes
     for sx in (12.0, 19.5):
         g.append(f'<circle cx="{X(sx):.0f}" cy="{Y(6.0):.0f}" r="3" fill="#8d897f"/>')
-    # charge lights
-    for i, cxl in enumerate((39.0, 41.5, 44.0)):
-        g.append(f'<circle cx="{X(cxl):.0f}" cy="{Y(2.5):.0f}" r="3.2" fill="{RED if i == 0 else GREEN}" opacity=".85"/>')
-    # USB-C opening on the bottom edge
-    ux = X(30.04)
-    g.append(f'<rect x="{ux - 15:.0f}" y="{h - 9:.0f}" width="30" height="12" rx="6" fill="#55524c"/>')
-    if card:
-        g.append(f'<g transform="translate({X(ax) - 70:.0f},{Y(ay) - 46:.0f}) rotate(-8 70 46)">'
-                 f'<rect width="140" height="88" rx="9" fill="#fff" stroke="{INK}" stroke-width="2"/>'
-                 f'<rect x="0" y="14" width="140" height="16" fill="{ACCENT}"/>'
-                 f'<circle cx="28" cy="58" r="14" fill="#d9dde6"/>'
-                 f'<rect x="52" y="46" width="70" height="7" rx="3" fill="#c8ccd6"/>'
-                 f'<rect x="52" y="60" width="50" height="7" rx="3" fill="#c8ccd6"/></g>')
-    body = "".join(g)
-    out = [f'<svg viewBox="0 0 {W:.0f} {H:.0f}" class="fig {'dev' if labels else 'devs'}" xmlns="http://www.w3.org/2000/svg">'
-           f'<g transform="translate({pad_l},{pad_t})">{body}']
-    if labels:
-        def lab(x0, y0, x1, y1, text, anchor):
-            lines = text.split("|")
-            ty = y1 - 8 * (len(lines) - 1)
-            spans = "".join(f'<tspan x="{x1 + (-6 if anchor == "end" else 6):.0f}" dy="{0 if i == 0 else 17}">{t}</tspan>'
-                            for i, t in enumerate(lines))
-            return (f'<line x1="{x0:.0f}" y1="{y0:.0f}" x2="{x1:.0f}" y2="{y1:.0f}" stroke="{MUTED}" stroke-width="1.3"/>'
-                    f'<circle cx="{x0:.0f}" cy="{y0:.0f}" r="3" fill="{MUTED}"/>'
-                    f'<text y="{ty:.0f}" text-anchor="{anchor}" class="dl" dominant-baseline="middle">{spans}</text>')
-        out.append(lab(X(ax + aw/2) - 4, Y(ay), w + 30, Y(ay), "<tspan class='b'>Tap card here</tspan>|(card area)", "start"))
-        out.append(lab(gx, gy, -30, gy - 40, "<tspan class='b'>Lights</tspan>|green and red", "end"))
-        out.append(lab(px - 3.6*S, py, -30, py, "<tspan class='b'>Power button</tspan>", "end"))
-        out.append(lab(X(12.0), Y(6.0) + 3, -30, h + 30, "Small holes:|for service only.|Do not press.", "end"))
-        out.append(lab(X(44.0) + 3, Y(2.5), w + 30, Y(2.5) - 30, "<tspan class='b'>Charging lights</tspan>|only when plugged in", "start"))
-        out.append(lab(ux + 15, h - 3, w + 30, h + 30, "<tspan class='b'>USB-C port</tspan>|charger or computer", "start"))
-    out.append("</g></svg>")
+    for i, (cx_, cy_) in enumerate(CHG):
+        if charge == "red" and i == 0:
+            g.append(glow(X(cx_), Y(cy_), RED, 3.5))
+        elif charge == "green" and i == 1:
+            g.append(glow(X(cx_), Y(cy_), GREEN, 3.5))
+        else:
+            g.append(f'<circle cx="{X(cx_):.0f}" cy="{Y(cy_):.0f}" r="3.2" fill="{off}"/>')
+    g.append(f'<rect x="{X(USB_X) - 15:.0f}" y="{CH - 9:.0f}" width="30" height="12" rx="6" fill="#55524c"/>')
+    return "".join(g)
+
+
+def id_card(cx, cy, angle=-8):
+    return (f'<g transform="translate({cx - 70:.0f},{cy - 44:.0f}) rotate({angle} 70 44)">'
+            f'<rect width="140" height="88" rx="9" fill="#fff" stroke="{INK}" stroke-width="2"/>'
+            f'<rect x="0" y="14" width="140" height="16" fill="{ACCENT}"/>'
+            f'<circle cx="28" cy="58" r="14" fill="#d9dde6"/>'
+            f'<rect x="52" y="46" width="70" height="7" rx="3" fill="#c8ccd6"/>'
+            f'<rect x="52" y="60" width="50" height="7" rx="3" fill="#c8ccd6"/></g>')
+
+
+def finger(px, py):
+    """A fingertip pressing at (px, py), coming from below left."""
+    return (f'<circle cx="{px:.0f}" cy="{py:.0f}" r="22" fill="none" stroke="{ACCENT}" stroke-width="2.5" opacity=".7"/>'
+            f'<circle cx="{px:.0f}" cy="{py:.0f}" r="31" fill="none" stroke="{ACCENT}" stroke-width="2" opacity=".35"/>'
+            f'<g transform="translate({px:.0f},{py:.0f}) rotate(35)">'
+            f'<rect x="-15" y="-6" width="30" height="110" rx="15" fill="{SKIN}" stroke="{SKIN_EDGE}" stroke-width="2"/>'
+            f'<rect x="-9" y="0" width="18" height="20" rx="8" fill="#f8e3d2" stroke="{SKIN_EDGE}" stroke-width="1.2"/>'
+            f'</g>')
+
+
+def shake():
+    """Vibration marks on both sides of the case."""
+    y = CH * 0.45
+    out = []
+    for side, x in ((-1, -8), (1, CW + 8)):
+        for k in (0, 1):
+            dx = side * (k * 9)
+            out.append(f'<path d="M {x + dx:.0f} {y - 22:.0f} q {side*7} 11 0 22 q {-side*7} 11 0 22" fill="none" '
+                       f'stroke="{INK}" stroke-width="2.4" stroke-linecap="round" opacity="{0.9 - k*0.35:.2f}"/>')
     return "".join(out)
 
 
-def laptop_figure():
-    return f'''<svg viewBox="0 0 640 215" class="fig lap" xmlns="http://www.w3.org/2000/svg">
-  <rect x="20" y="40" width="110" height="150" rx="16" fill="{CASE}" stroke="{CASE_EDGE}" stroke-width="2"/>
-  <rect x="38" y="56" width="74" height="56" rx="8" fill="#f6f4ef" stroke="{ACCENT}" stroke-width="2" stroke-dasharray="6 4"/>
-  <circle cx="45" cy="172" r="9" fill="#fbfaf7" stroke="{INK}" stroke-width="1.8"/>
-  <circle cx="64" cy="148" r="4" fill="{GREEN}"/><circle cx="72" cy="148" r="4" fill="{RED}"/>
-  <rect x="62" y="186" width="26" height="10" rx="5" fill="#55524c"/>
-  <path d="M 75 196 C 75 230, 250 220, 290 175 S 340 150, 360 150" fill="none" stroke="#55524c" stroke-width="5" stroke-linecap="round"/>
-  <text x="235" y="160" text-anchor="middle" class="dl">USB-C cable</text>
-  <rect x="360" y="14" width="250" height="160" rx="10" fill="#2b2b2b"/>
-  <rect x="372" y="26" width="226" height="136" rx="4" fill="#fff"/>
-  <rect x="372" y="26" width="226" height="28" fill="#3646a8"/>
-  <text x="384" y="45" class="dl b" fill="#fff">Attendance Logger</text>
-  <rect x="384" y="64" width="90" height="12" rx="3" fill="#e5e8f5"/>
-  <rect x="482" y="64" width="40" height="12" rx="3" fill="#43a047"/>
-  <rect x="384" y="86" width="80" height="66" rx="4" fill="#f1f2f7"/>
-  <rect x="472" y="86" width="114" height="66" rx="4" fill="#f1f2f7"/>
-  <text x="529" y="126" text-anchor="middle" font-size="26" font-weight="700" fill="#2e7d32">17</text>
-  <path d="M 340 174 L 630 174 L 612 194 L 358 194 Z" fill="#3d3d3d"/>
-  <text x="75" y="28" text-anchor="middle" class="dl b">Device</text>
-  <text x="485" y="206" text-anchor="middle" class="dl b">Computer with the app</text>
+def mini(lit=None, card=False, press=False, cable=False, charge=None, buzzing=False, dim=False,
+         badge=None, sleep=False):
+    """A small drawing of the device in one state."""
+    pad_l, pad_r, pad_t = 40, 40, 14
+    pad_b = 70 if (press or cable) else 14
+    W, H = CW + pad_l + pad_r, CH + pad_t + pad_b
+    g = [case_body(lit, charge, dim, waves=not card)]
+    if card:
+        g.append(id_card(X(TAP[0]), Y(TAP[1]) + 4))
+    if cable:
+        ux = X(USB_X)
+        g.append(f'<rect x="{ux - 13:.0f}" y="{CH - 4:.0f}" width="26" height="26" rx="5" fill="#3d3b37"/>'
+                 f'<path d="M {ux:.0f} {CH + 22:.0f} L {ux:.0f} {CH + pad_b:.0f}" stroke="#3d3b37" stroke-width="8"/>')
+    if press:
+        g.append(finger(X(BTN[0]), Y(BTN[1])))
+    if buzzing:
+        g.append(shake())
+    if sleep:
+        g.append(f'<text x="{CW - 30:.0f}" y="{CH*0.6:.0f}" font-size="44" font-weight="800" fill="{MUTED}" '
+                 f'text-anchor="end">z<tspan font-size="34" dy="-16">z</tspan><tspan font-size="24" dy="-14">z</tspan></text>')
+    if badge:
+        g.append(f'<g transform="translate({CW - 4:.0f},4)"><rect x="-84" y="0" width="88" height="44" rx="22" '
+                 f'fill="{ACCENT}"/><text x="-40" y="31" text-anchor="middle" font-size="25" font-weight="800" '
+                 f'fill="#fff">{badge}</text></g>')
+    return (f'<svg viewBox="0 0 {W:.0f} {H:.0f}" class="mini" xmlns="http://www.w3.org/2000/svg">'
+            f'<g transform="translate({pad_l},{pad_t})">{"".join(g)}</g></svg>')
+
+
+def device_labelled():
+    pad_l, pad_r, pad_t, pad_b = 205, 215, 10, 60
+    W, H = CW + pad_l + pad_r, CH + pad_t + pad_b
+    ax, ay, aw, ah = TAP
+    gx, gy = X(LED_G[0]), Y(LED_G[1])
+    px, py = X(BTN[0]), Y(BTN[1])
+    ux = X(USB_X)
+
+    def lab(x0, y0, x1, y1, text, anchor):
+        lines = text.split("|")
+        ty = y1 - 9 * (len(lines) - 1)
+        spans = "".join(f'<tspan x="{x1 + (-6 if anchor == "end" else 6):.0f}" dy="{0 if i == 0 else 19}">{t}</tspan>'
+                        for i, t in enumerate(lines))
+        return (f'<line x1="{x0:.0f}" y1="{y0:.0f}" x2="{x1:.0f}" y2="{y1:.0f}" stroke="{MUTED}" stroke-width="1.3"/>'
+                f'<circle cx="{x0:.0f}" cy="{y0:.0f}" r="3" fill="{MUTED}"/>'
+                f'<text y="{ty:.0f}" text-anchor="{anchor}" class="dl" dominant-baseline="middle">{spans}</text>')
+    labels = "".join([
+        lab(X(ax + aw/2) - 4, Y(ay), CW + 30, Y(ay), "<tspan class='b'>Tap card here</tspan>", "start"),
+        lab(gx, gy, -30, gy - 40, "<tspan class='b'>Lights</tspan>|green / red", "end"),
+        lab(px - 3.6*S, py, -30, py, "<tspan class='b'>Power button</tspan>", "end"),
+        lab(X(12.0), Y(6.0) + 3, -30, CH + 32, "Small holes:|do not press", "end"),
+        lab(X(44.0) + 3, Y(2.5), CW + 30, Y(2.5) - 30, "<tspan class='b'>Charging lights</tspan>", "start"),
+        lab(ux + 15, CH - 3, CW + 30, CH + 30, "<tspan class='b'>USB-C port</tspan>", "start"),
+    ])
+    return (f'<svg viewBox="0 0 {W:.0f} {H:.0f}" class="dev" xmlns="http://www.w3.org/2000/svg">'
+            f'<g transform="translate({pad_l},{pad_t})">{case_body()}{labels}</g></svg>')
+
+
+def laptop():
+    return f'''<svg viewBox="0 0 300 200" class="mini" xmlns="http://www.w3.org/2000/svg">
+  <rect x="25" y="10" width="250" height="160" rx="10" fill="#2b2b2b"/>
+  <rect x="37" y="22" width="226" height="136" rx="4" fill="#fff"/>
+  <rect x="37" y="22" width="226" height="28" fill="#3646a8"/>
+  <text x="49" y="41" font-size="14" font-weight="700" fill="#fff">Attendance Logger</text>
+  <rect x="49" y="60" width="90" height="12" rx="3" fill="#e5e8f5"/>
+  <rect x="147" y="60" width="40" height="12" rx="3" fill="#43a047"/>
+  <rect x="49" y="82" width="80" height="66" rx="4" fill="#f1f2f7"/>
+  <rect x="137" y="82" width="114" height="66" rx="4" fill="#f1f2f7"/>
+  <text x="194" y="124" text-anchor="middle" font-size="28" font-weight="700" fill="#2e7d32">17</text>
+  <path d="M 5 170 L 295 170 L 277 190 L 23 190 Z" fill="#3d3d3d"/>
 </svg>'''
 
+# ---------------------------------------------------------------- app screenshots
 
-def timeline_figure():
-    x0, x5 = 70, 600
-    def xs(s):
-        return x0 + (x5 - x0) * s / 5
-    return f'''<svg viewBox="0 0 660 180" class="fig tl" xmlns="http://www.w3.org/2000/svg">
-  <rect x="{x0}" y="70" width="{x5 - x0}" height="22" rx="11" fill="#eceae4"/>
-  <rect x="{x0}" y="70" width="{xs(0.6) - x0:.0f}" height="22" rx="11" fill="{GREEN}" opacity=".75"/>
-  <rect x="{xs(2):.0f}" y="70" width="{xs(5) - xs(2):.0f}" height="22" fill="{ACCENT}" opacity=".18"/>
-  <rect x="{xs(5) - 6:.0f}" y="70" width="12" height="22" rx="6" fill="{RED}"/>
-  {"".join(f'<line x1="{xs(s):.0f}" y1="96" x2="{xs(s):.0f}" y2="104" stroke="{MUTED}" stroke-width="1.5"/><text x="{xs(s):.0f}" y="120" text-anchor="middle" class="dl">{s} s</text>' for s in range(6))}
-  <text x="{x0 - 12}" y="86" text-anchor="end" class="dl b">Press</text>
-  <text x="{xs(0.3):.0f}" y="40" text-anchor="middle" class="dl b">Quick press</text>
-  <text x="{xs(0.3):.0f}" y="58" text-anchor="middle" class="dl">battery check</text>
-  <line x1="{xs(2):.0f}" y1="60" x2="{xs(2):.0f}" y2="104" stroke="{ACCENT}" stroke-width="2.5"/>
-  <text x="{xs(2) + 8:.0f}" y="40" class="dl b" fill="{ACCENT}">At 2 s it buzzes once</text>
-  <text x="{xs(2) + 8:.0f}" y="58" class="dl">let go now = new lecture</text>
-  <text x="{xs(5):.0f}" y="150" text-anchor="end" class="dl b" fill="{RED}">Keep holding to 5 s</text>
-  <text x="{xs(5):.0f}" y="168" text-anchor="end" class="dl">= switch off</text>
-</svg>'''
+def shot(name, crop=None, marks=(), boxes=()):
+    """An app screenshot (guide_img/<name>), cropped by the viewBox, with numbered markers and red boxes."""
+    raw = (IMG / name).read_bytes()
+    w, h = struct.unpack(">II", raw[16:24])
+    x0, y0, x1, y1 = crop or (0, 0, w, h)
+    over = "".join(f'<rect x="{a - 5}" y="{b - 5}" width="{c - a + 10}" height="{d - b + 10}" rx="10" fill="none" '
+                   f'stroke="{RED}" stroke-width="5"/>' for a, b, c, d in boxes)
+    over += "".join(f'<circle cx="{x}" cy="{y}" r="24" fill="{RED}" stroke="#fff" stroke-width="5"/>'
+                    f'<text x="{x}" y="{y + 10}" text-anchor="middle" font-size="28" font-weight="800" '
+                    f'fill="#fff">{n}</text>' for n, x, y in marks)
+    data = base64.b64encode(raw).decode()
+    return (f'<svg viewBox="{x0} {y0} {x1 - x0} {y1 - y0}" class="shot" xmlns="http://www.w3.org/2000/svg">'
+            f'<image href="data:image/png;base64,{data}" width="{w}" height="{h}"/>{over}</svg>')
+
+# ---------------------------------------------------------------- page parts
+
+def card(pic, title, line="", signal=""):
+    sig = f'<div class="sig">{signal}</div>' if signal else ""
+    ln = f'<p>{line}</p>' if line else ""
+    return f'<div class="card"><div class="pic">{pic}</div>{sig}<h3>{title}</h3>{ln}</div>'
 
 
-def app_figure():
-    if not APP_SHOT.exists():
-        return ""
-    data = base64.b64encode(APP_SHOT.read_bytes()).decode()
-    # markers sit beside what they point at, never on top of it
-    marks = [(1, 925, 291, "Type the lecture name, press Start lecture"),
-             (2, 262, 452, "All lectures"),
-             (3, 723, 455, "Who came, with the time"),
-             (4, 1353, 912, "Save the list as PDF"),
-             (5, 376, 103, "Eject")]
-    dots = "".join(f'<circle cx="{x}" cy="{y}" r="26" fill="{RED}" stroke="#fff" stroke-width="5"/>'
-                   f'<text x="{x}" y="{y + 11}" text-anchor="middle" font-size="32" font-weight="700" '
-                   f'fill="#fff">{n}</text>' for n, x, y, _ in marks)
-    keys = "".join(f'<li><b class="num">{n}</b> {t}</li>' for n, _, _, t in marks)
-    return (f'<div class="shot"><svg viewBox="0 0 1475 950" xmlns="http://www.w3.org/2000/svg">'
-            f'<image href="data:image/png;base64,{data}" width="1475" height="950"/>{dots}</svg></div>'
-            f'<ol class="keys">{keys}</ol>')
+def step(n, pic, text):
+    return f'<div class="step"><div class="pic">{pic}</div><p><b class="num">{n}</b>{text}</p></div>'
 
-# ---------------------------------------------------------------- pages
+
+ARROW = (f'<div class="arrow"><svg viewBox="0 0 40 40"><path d="M 6 20 H 30 M 22 11 L 32 20 L 22 29" fill="none" '
+         f'stroke="{ACCENT}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>')
+
+
+def icon(body, vb="0 0 100 100"):
+    return f'<svg viewBox="{vb}" class="mini" xmlns="http://www.w3.org/2000/svg">{body}</svg>'
+
+
+NO = f'<line x1="14" y1="88" x2="86" y2="12" stroke="{RED}" stroke-width="8" stroke-linecap="round"/>'
 
 CSS = f"""
-@page {{ size: A4; margin: 13mm 14mm 12mm; }}
+@page {{ size: A4; margin: 12mm 13mm 11mm; }}
 * {{ box-sizing: border-box; }}
-body {{ font-family: Inter, 'DejaVu Sans', Arial, sans-serif; color: {INK}; font-size: 11.8pt;
-        line-height: 1.42; margin: 0; }}
+body {{ font-family: Inter, 'DejaVu Sans', Arial, sans-serif; color: {INK}; font-size: 12pt; line-height: 1.35; margin: 0; }}
 .page {{ page-break-after: always; }}
 .page:last-child {{ page-break-after: auto; }}
-h1 {{ font-size: 27pt; margin: 0 0 2mm; letter-spacing: -.3px; }}
-.sub {{ color: {MUTED}; font-size: 13pt; margin: 0 0 6mm; }}
-h2 {{ font-size: 16pt; margin: 5mm 0 2.5mm; padding-bottom: 1.5mm; border-bottom: 2.5px solid {ACCENT}; }}
-h2 .n {{ display: inline-block; background: {ACCENT}; color: #fff; border-radius: 50%; width: 1.5em;
-         height: 1.5em; text-align: center; line-height: 1.5em; font-size: .8em; margin-right: 2mm;
-         vertical-align: .1em; }}
-p {{ margin: 0 0 2.5mm; }}
-.fig {{ display: block; width: 100%; height: auto; margin: 2mm auto 3mm; }}
-.dev {{ width: 100%; height: auto; }}
-.dev .dl {{ font-size: 17px; }}
-.devs {{ height: 72mm; width: auto; }}
-.lap {{ height: 46mm; width: auto; }}
-.tl {{ height: 48mm; width: auto; }}
-.dl {{ font-family: Inter, Arial, sans-serif; font-size: 15px; fill: {INK}; }}
+h1 {{ font-size: 30pt; margin: 0 0 1mm; letter-spacing: -.4px; }}
+.sub {{ color: {MUTED}; font-size: 14pt; margin: 0 0 3mm; }}
+h2 {{ font-size: 18pt; margin: 6mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 3px solid {ACCENT}; }}
+.page > h2:first-child {{ margin-top: 0; }}
+h3 {{ font-size: 13pt; margin: 1.5mm 0 0; }}
+p {{ margin: .5mm 0 0; }}
+.dl {{ font-family: Inter, Arial, sans-serif; font-size: 18px; fill: {INK}; }}
 .b {{ font-weight: 700; }}
-.steps {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin: 3mm 0; }}
-.step {{ background: #f5f4f0; border-radius: 10px; padding: 4mm; }}
-.step .big {{ font-size: 22pt; font-weight: 800; color: {ACCENT}; line-height: 1; }}
-.step h3 {{ margin: 2mm 0 1mm; font-size: 13pt; }}
-.step p {{ font-size: 11.2pt; margin: 0; }}
-table {{ width: 100%; border-collapse: collapse; margin: 2mm 0 3mm; }}
-td, th {{ padding: 1.7mm 2.2mm; vertical-align: middle; border-bottom: 1px solid #e3e1da; text-align: left; }}
-th {{ font-size: 10.5pt; color: {MUTED}; text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }}
-td.s {{ width: 36%; }}
-.sig {{ display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }}
-.sig .t {{ font-size: 11pt; color: {MUTED}; margin-left: 4px; }}
-.note {{ background: #fff6e0; border-left: 5px solid #f0a500; padding: 3mm 4mm; border-radius: 6px; margin: 3mm 0; }}
-.tip {{ background: #eaf1ff; border-left: 5px solid {ACCENT}; padding: 3mm 4mm; border-radius: 6px; margin: 3mm 0; }}
-ol.list {{ padding-left: 6mm; margin: 1mm 0 3mm; }}
-ol.list li {{ margin-bottom: 1.8mm; }}
-.shot {{ width: 150mm; margin: 0 auto; }}
-.shot svg {{ width: 100%; height: auto; border: 1px solid #d6d4cc; border-radius: 6px; }}
-ol.keys {{ list-style: none; padding: 0; margin: 2mm 0 0; columns: 2; font-size: 11.2pt; }}
-ol.keys li {{ margin-bottom: 1.5mm; }}
-.num {{ display: inline-block; background: {RED}; color: #fff; border-radius: 50%; width: 1.55em; height: 1.55em;
-        text-align: center; line-height: 1.55em; font-size: .85em; margin-right: 1.5mm; }}
-.two {{ display: grid; grid-template-columns: 62mm 1fr; gap: 7mm; align-items: center; }}
-.foot {{ color: {MUTED}; font-size: 9.5pt; margin-top: 5mm; }}
+svg.dev {{ display: block; width: 100%; height: auto; margin: 0 auto; }}
+svg.mini {{ display: block; height: 100%; width: auto; max-width: 100%; margin: 0 auto; }}
+svg.shot {{ display: block; width: 100%; height: auto; border: 1px solid #d6d4cc; border-radius: 6px; background: #fff; }}
+.grid {{ display: grid; gap: 4mm; }}
+.g3 {{ grid-template-columns: repeat(3, 1fr); }}
+.g4 {{ grid-template-columns: repeat(4, 1fr); }}
+.card {{ background: #f5f4f0; border-radius: 12px; padding: 3mm 3mm 3.5mm; text-align: center; }}
+.card .pic {{ height: 48mm; }}
+.g4 .card .pic {{ height: 40mm; }}
+.short .card .pic {{ height: 34mm; }}
+.card p {{ color: {MUTED}; font-size: 11pt; }}
+.sig {{ display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 2mm; min-height: 18px; font-size: 10pt; color: {MUTED}; }}
+.flow {{ display: flex; align-items: stretch; gap: 1.5mm; }}
+.flow .step {{ flex: 1; }}
+.flow .arrow {{ display: flex; align-items: center; }}
+.step {{ background: #f5f4f0; border-radius: 12px; padding: 3mm; text-align: center; }}
+.step .pic {{ height: 46mm; display: flex; align-items: center; justify-content: center; }}
+.step .pic svg.shot {{ width: 100%; height: auto; max-height: 46mm; }}
+.big .step .pic {{ height: 62mm; }}
+.step p {{ font-size: 11.5pt; margin-top: 2mm; }}
+.arrow svg {{ width: 8mm; height: 8mm; }}
+.num {{ display: inline-block; background: {RED}; color: #fff; border-radius: 50%; width: 1.6em; height: 1.6em;
+        text-align: center; line-height: 1.6em; font-size: .85em; margin-right: 1.5mm; }}
+.keys {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5mm 4mm; margin: 2.5mm 0 0; font-size: 12pt; }}
+.note {{ background: #fff6e0; border-left: 5px solid #f0a500; padding: 2.5mm 4mm; border-radius: 6px; margin: 3mm 0 0; font-size: 12pt; }}
+.row {{ display: grid; grid-template-columns: 1.2fr 1fr; gap: 6mm; align-items: center; margin-top: 4mm; }}
+table {{ width: 100%; border-collapse: collapse; }}
+td {{ padding: 2mm; border-bottom: 1px solid #e3e1da; vertical-align: middle; font-size: 11.5pt; }}
+td:first-child {{ font-weight: 700; width: 40%; }}
+.foot {{ color: {MUTED}; font-size: 9.5pt; margin-top: 4mm; }}
 """
 
 
 def page1():
     return f'''<div class="page">
 <h1>Attendance Logger</h1>
-<p class="sub">An easy guide for lecturers. Students tap their ID card, and the device keeps the record.</p>
-{device_top()}
-<h2><span class="n">1</span>Taking attendance: 3 easy steps</h2>
-<div class="steps">
- <div class="step"><div class="big">1</div><h3>Switch on</h3>
-  <p>Press the power button once. You will see a <b>green light</b> and feel a short buzz.</p></div>
- <div class="step"><div class="big">2</div><h3>Start the lecture</h3>
-  <p>In the app, press <b>Start lecture</b>. No computer? <b>Hold the button for 2 seconds</b> until it buzzes, then let go.</p></div>
- <div class="step"><div class="big">3</div><h3>Students tap</h3>
-  <p>Each student holds the ID card flat on the card area until the device buzzes.</p></div>
+<p class="sub">Easy guide for lecturers</p>
+{device_labelled()}
+<h2>Taking attendance</h2>
+<div class="flow big">
+ {step(1, mini(lit="green", press=True, buzzing=True), "Press the button.<br>Green light = ON")}
+ {ARROW}
+ {step(2, mini(lit="green", press=True, badge="2 s"), "Hold 2 s, let go.<br>New lecture starts")}
+ {ARROW}
+ {step(3, mini(lit="green", card=True, buzzing=True), "Students tap<br>their ID card")}
 </div>
-<div class="tip"><b>Before your first lecture:</b> charge the device fully (section 6), install the app
-on your computer (section 9) and add your students (section 8). You only need to do this once.</div>
 </div>'''
 
 
 def page2():
     return f'''<div class="page">
-<h2><span class="n">2</span>How to tap a card</h2>
-<div class="two">
- <div>{device_top(labels=False, card=True)}</div>
- <div>
-  <ol class="list">
-   <li>Hold the card <b>flat</b> on top of the card area.</li>
-   <li>Keep it there for about <b>one second</b>, until you feel the buzz.</li>
-   <li>Green light with one buzz means the student is <b>marked present</b>.</li>
-  </ol>
-  <div class="tip">Only one card at a time, please. Do not put two cards on the device together.</div>
-  <div class="tip">Tapping again does no harm. The student is counted only <b>once</b> for each lecture.</div>
- </div>
+<h2>Lights and buzzes</h2>
+<div class="grid g3">
+ {card(mini(lit="green", card=True, buzzing=True), "Marked present", "OK. Next student.", dot(GREEN) + buzz(1))}
+ {card(mini(card=True, buzzing=True), "Already marked", "Not counted again.", buzz(2))}
+ {card(mini(lit="green", buzzing=True), "New lecture", "Students can tap now.", dot(GREEN) + buzz(3))}
+ {card(mini(lit="red"), "Battery low", "Please charge it.", "".join(dot(RED, 5) for _ in range(5)) + "&nbsp;5 blinks")}
+ {card(mini(lit="red", buzzing=True), "Memory full", "Connect to the computer.", dot(RED) + buzz(4))}
+ {card(mini(lit="red"), "Not working", "Unplug. Try again.", dot(RED, 5) * 3 + "&nbsp;fast, non-stop")}
 </div>
-
-<h2><span class="n">3</span>What the lights and buzzes mean</h2>
-<table>
- <tr><th>You see / feel</th><th>Meaning</th><th>What to do</th></tr>
- <tr><td class="s">{signal(led(GREEN), buzz(1))}</td><td><b>Marked present.</b></td><td>Nothing. Next student.</td></tr>
- <tr><td class="s">{signal(buzz(2), '<span class="t">two short buzzes</span>')}</td><td>Already marked in this lecture.</td><td>Nothing. It is not counted twice.</td></tr>
- <tr><td class="s">{signal(led(GREEN), buzz(3))}</td><td>A <b>new lecture</b> has started.</td><td>Students can tap now.</td></tr>
- <tr><td class="s">{signal(blinks(RED, 5), '<span class="t">5 red blinks</span>')}</td><td><b>Battery is low.</b></td><td>Charge it with a USB-C charger.</td></tr>
- <tr><td class="s">{signal(led(RED), buzz(4))}</td><td><b>Memory is full.</b> The tap was not saved.</td><td>Connect to the computer and start a lecture from the app. This empties the memory.</td></tr>
- <tr><td class="s">{signal(led(GREEN), buzz(2), '<span class="t">after the computer</span>')}</td><td>Settings saved. Taking attendance again.</td><td>Nothing.</td></tr>
- <tr><td class="s">{signal(led(RED), buzz(3), '<span class="t">after the computer</span>')}</td><td>Settings not accepted. Nothing changed.</td><td>Start the lecture again from the app.</td></tr>
- <tr><td class="s">{signal(blinks(RED, 3), '<span class="t">fast red, non-stop</span>')}</td><td>The device has a fault.</td><td>Unplug, wait 10 seconds, try again. If it repeats, give it to the technical staff.</td></tr>
-</table>
+<h2>Power button</h2>
+<div class="grid g4">
+ {card(mini(lit="green", press=True), "Press", "Switch ON")}
+ {card(mini(lit="green", press=True, badge="tap"), "Quick press", "Battery check")}
+ {card(mini(lit="green", press=True, badge="2 s"), "Hold 2 s", "Next lecture")}
+ {card(mini(lit="red", press=True, badge="5 s"), "Hold 5 s", "Switch OFF")}
+</div>
 </div>'''
 
 
 def page3():
     return f'''<div class="page">
-<h2><span class="n">4</span>The power button</h2>
-{timeline_figure()}
-<table>
- <tr><th>Do this</th><th>What happens</th></tr>
- <tr><td class="s"><b>Press once</b> (device is off)</td><td>Switches on. Green light and a short buzz.</td></tr>
- <tr><td class="s"><b>Quick press</b> (device is on)</td><td>Shows the battery: 2 green blinks = OK, 5 red blinks = low.</td></tr>
- <tr><td class="s"><b>Hold 2 seconds</b> until it buzzes, then let go</td><td>Starts the <b>next lecture</b> (green and three quick buzzes). Everyone can tap again.</td></tr>
- <tr><td class="s"><b>Hold 5 seconds</b></td><td>Switches off. Red light and a long buzz. No new lecture.</td></tr>
- <tr><td class="s"><b>Press twice quickly</b> (cable in, after Eject)</td><td>Brings the device back on the computer.</td></tr>
-</table>
-<div class="tip">If nobody taps for <b>3 minutes</b>, the device switches itself off to save the battery.
-Just press the button to switch it on again. <b>All records are safe</b>, even when it is off.</div>
-
-<h2><span class="n">5</span>Two lectures back to back</h2>
-<p>When one lecture finishes and the next one starts, <b>hold the power button for 2 seconds</b>
-until you feel a buzz, then let go. You will see green with three quick buzzes. Now the next
-lecture has started and every student can tap again.</p>
-<p>The device names it for you: <i>Circuits Lecture 4</i> becomes <i>Circuits Lecture 5</i>.
-You can change the name later in the app.</p>
-<div class="note">If you do not start a new lecture, a student who already tapped in the last
-6 hours will only get two buzzes and will not be counted again.</div>
-
-<h2><span class="n">6</span>Charging</h2>
-<p>Use any <b>USB-C</b> phone charger, power bank or computer. The small lights near the USB port
-show the charging: <b>red</b> while charging, <b>green</b> when full. The device keeps taking
-attendance while it charges. A full charge lasts <b>many months</b> of normal use.</p>
+<h2>Charging</h2>
+<div class="grid g3">
+ {card(mini(cable=True, charge="red"), "Red = charging", "Any USB-C phone charger")}
+ {card(mini(cable=True, charge="green"), "Green = full", "Lasts many months")}
+ {card(mini(dim=True, sleep=True, badge="3 min"), "Sleeps by itself", "Press to wake. Records are safe.")}
+</div>
+<h2>See who came</h2>
+<div class="flow">
+ {step(1, mini(cable=True, lit="green"), "Connect the<br>USB-C cable")}
+ {ARROW}
+ {step(2, laptop(), "Open the<br><b>Attendance Logger</b>")}
+ {ARROW}
+ {step(3, shot("app_lectures.png", (664, 332, 1258, 762), boxes=[(1157, 348, 1238, 427)]), "Pick a lecture.<br>See who came")}
+</div>
+<h2>Cable still in? Press Eject first</h2>
+<div class="flow">
+ {step(1, shot("app_lectures.png", (255, 100, 520, 156), boxes=[(271, 112, 353, 144)]), "Press <b>Eject</b><br>in the app")}
+ {ARROW}
+ {step(2, mini(cable=True, lit="green", buzzing=True), "Green +<br>2 buzzes")}
+ {ARROW}
+ {step(3, mini(cable=True, lit="green", card=True), "Now students<br>can tap")}
+</div>
+<div class="note">While the device shows in the app, a tap is <b>not</b> attendance. It is only for adding cards.</div>
 </div>'''
 
 
 def page4():
     return f'''<div class="page">
-<h2><span class="n">7</span>After the lecture: see who came</h2>
-{laptop_figure()}
-<ol class="list">
- <li>Connect the device to the computer with the <b>USB-C cable</b>.</li>
- <li>Open the <b>Attendance Logger</b> app. It reads the device by itself.
-     The top of the window says <i>Device connected</i> and shows the battery.</li>
- <li>Click a lecture to see who came, with the time each student tapped.</li>
- <li>Press <b>Save as PDF</b> or <b>Save list (CSV)</b> to keep or print the list.</li>
-</ol>
-{app_figure()}
-<div class="note"><b>While the device is connected to the computer, taps are not attendance.</b>
-They are only for registering cards. To take attendance with the cable still in, press
-<b>Eject</b> in the app (or press the device's button once). Green with two buzzes means it is ready.</div>
+<h2>The app</h2>
+<div>{shot("app_lectures.png", marks=[(1, 745, 237), (2, 206, 366), (3, 646, 368), (4, 1180, 768), (5, 312, 88)])}</div>
+<div class="keys">
+ <div><b class="num">1</b>Start a lecture</div>
+ <div><b class="num">2</b>All lectures</div>
+ <div><b class="num">3</b>Who came</div>
+ <div><b class="num">4</b>Save as PDF</div>
+ <div><b class="num">5</b>Eject</div>
+</div>
+<h2>Add a new student</h2>
+<div class="flow">
+ {step(1, shot("app_students.png", (1000, 426, 1252, 484), boxes=[(1131, 439, 1239, 471)]), "Students page:<br><b>Tap a card…</b>")}
+ {ARROW}
+ {step(2, mini(cable=True, lit="green", card=True), "Tap the card<br>on the device")}
+ {ARROW}
+ {step(3, shot("app_register.png"), "Type index no.<br>and name. <b>Save</b>")}
+</div>
+<div class="row">
+ <div>{shot("app_students.png", (222, 172, 1258, 408), boxes=[(1147, 244, 1241, 276)])}</div>
+ <div><h3>Forgot to add a card?</h3><p>No problem. The device saves every card.
+ It shows here, in <b>New cards</b>. Press <b>Register…</b></p></div>
+</div>
 </div>'''
 
 
 def page5():
+    exe = icon(f'<rect x="22" y="10" width="56" height="80" rx="8" fill="#fff" stroke="{INK}" stroke-width="3"/>'
+               f'<path d="M 50 28 V 62 M 36 50 L 50 64 L 64 50" fill="none" stroke="{ACCENT}" stroke-width="6" '
+               f'stroke-linecap="round" stroke-linejoin="round"/><rect x="34" y="72" width="32" height="6" rx="3" fill="{ACCENT}"/>')
+    smart = icon('<rect x="6" y="14" width="148" height="92" rx="6" fill="#1f5fbf"/>'
+                 '<text x="16" y="42" font-size="13" font-weight="700" fill="#fff">Windows protected your PC</text>'
+                 '<text x="16" y="64" font-size="11" fill="#dfe8ff" text-decoration="underline">More info</text>'
+                 '<rect x="84" y="78" width="62" height="20" fill="#fff"/>'
+                 '<text x="115" y="92" text-anchor="middle" font-size="10" fill="#1f5fbf">Run anyway</text>', "0 0 160 120")
+    app = icon('<rect x="10" y="10" width="80" height="80" rx="18" fill="#3646a8"/>'
+               '<path d="M 28 52 L 44 68 L 74 34" fill="none" stroke="#fff" stroke-width="10" '
+               'stroke-linecap="round" stroke-linejoin="round"/>')
+    drop = icon(f'<path d="M 50 12 C 50 12 24 44 24 62 A 26 26 0 0 0 76 62 C 76 44 50 12 50 12 Z" fill="#7fb2f0"/>{NO}')
+    sun = icon(f'<circle cx="50" cy="48" r="18" fill="#f0a500"/><g stroke="#f0a500" stroke-width="6" stroke-linecap="round">'
+               f'<line x1="50" y1="12" x2="50" y2="20"/><line x1="50" y1="76" x2="50" y2="84"/><line x1="14" y1="48" x2="22" y2="48"/>'
+               f'<line x1="78" y1="48" x2="86" y2="48"/></g>{NO}')
+    fall = icon(f'<rect x="30" y="10" width="40" height="52" rx="8" fill="{CASE}" stroke="{CASE_EDGE}" stroke-width="3"/>'
+                f'<path d="M 50 68 V 90 M 40 80 L 50 90 L 60 80" fill="none" stroke="{INK}" stroke-width="5" '
+                f'stroke-linecap="round" stroke-linejoin="round"/>{NO}')
+    week = icon('<rect x="10" y="22" width="80" height="54" rx="6" fill="#2b2b2b"/><rect x="17" y="29" width="66" height="40" fill="#fff"/>'
+                f'<text x="50" y="57" text-anchor="middle" font-size="18" font-weight="800" fill="{ACCENT}">weekly</text>'
+                '<path d="M 4 80 H 96 L 90 88 H 10 Z" fill="#3d3d3d"/>')
     return f'''<div class="page">
-<h2><span class="n">8</span>Adding a new student</h2>
-<ol class="list">
- <li>Connect the device to the computer and open the app.</li>
- <li>Go to the <b>Students</b> page and press <b>Tap a card…</b></li>
- <li>Tap the student's card on the device. The card number comes into the app by itself.</li>
- <li>Type the <b>index number</b> and <b>name</b>, then press <b>Save</b>.</li>
-</ol>
-<div class="tip">Forgot to register a card before the lecture? No problem. The device saves every card.
-Register it later: the app shows it in the orange <b>New cards</b> box with a <b>Register…</b> button.</div>
+<h2>Install the app (Windows)</h2>
+<div class="grid g3">
+ {card(exe, "1. Double-click", "AttendanceLogger-Setup-1.0.0.exe")}
+ {card(smart, "2. Blue window?", "More info, then Run anyway")}
+ {card(app, "3. Start menu", "Open Attendance Logger")}
+</div>
 
-<h2><span class="n">9</span>Installing the app (Windows)</h2>
-<ol class="list">
- <li>Get the file <b>AttendanceLogger-Setup-1.0.0.exe</b> (from the project's GitHub page, folder
-     <i>Companion/dist</i>) and double-click it.</li>
- <li>If a blue window says <i>Windows protected your PC</i>, click <b>More info</b>, then <b>Run anyway</b>.</li>
- <li>Click <b>Next</b> and <b>Install</b>. Then open <b>Attendance Logger</b> from the Start menu. No internet is needed.</li>
-</ol>
-
-<h2><span class="n">10</span>Problems and quick fixes</h2>
+<h2>Quick fixes</h2>
 <table>
- <tr><th>Problem</th><th>What to do</th></tr>
- <tr><td class="s">No light when a card is tapped</td><td>The device may be off. Press the power button once. Hold the card flat, over the card area.</td></tr>
- <tr><td class="s">Device does not switch on</td><td>Battery may be empty. Charge it for some time, then try again.</td></tr>
- <tr><td class="s">App says <i>Device not connected</i></td><td>Check the cable. If you pressed Eject before, press the device's button <b>twice quickly</b>, or unplug and plug in again.</td></tr>
- <tr><td class="s">A student is not on the list</td><td>The card may not be registered. Register it (section 8); the old taps then show under that student.</td></tr>
- <tr><td class="s">Wrong times in the list</td><td>In the app, press <b>Set device time</b>.</td></tr>
+ <tr><td>No light when a card is tapped</td><td>Press the power button. Hold the card flat on TAP.</td></tr>
+ <tr><td>Device does not switch on</td><td>Charge it for some time. Try again.</td></tr>
+ <tr><td>App says <i>Device not connected</i></td><td>Press the device button <b>twice quickly</b>, or unplug and plug in.</td></tr>
+ <tr><td>Student not on the list</td><td>Card not added yet. Add it (page 4).</td></tr>
+ <tr><td>Wrong time in the list</td><td>Press <b>Set device time</b> in the app.</td></tr>
 </table>
 
-<h2><span class="n">11</span>Please take care</h2>
-<p>Keep the device dry and away from heat. Do not drop it. Do not open the case. Do not press the
-small service holes. Keep it charged, and connect it to the computer at least once a week so the
-records are saved in the app.</p>
+<h2>Please take care</h2>
+<div class="grid g4">
+ {card(drop, "Keep dry")}
+ {card(sun, "No heat or sun")}
+ {card(fall, "Do not drop")}
+ {card(week, "Connect weekly", "Saves the records")}
+</div>
 <p class="foot">Attendance Logger · Easy Guide · October 2026</p>
 </div>'''
 
 
 def main():
+    missing = [n for n in ("app_lectures.png", "app_students.png", "app_register.png") if not (IMG / n).exists()]
+    if missing:
+        sys.exit("missing %s: run app_screenshots.py first" % ", ".join(missing))
     html = (f"<!doctype html><html><head><meta charset='utf-8'><title>Attendance Logger: Easy Guide</title>"
             f"<style>{CSS}</style></head><body>{page1()}{page2()}{page3()}{page4()}{page5()}</body></html>")
     chrome = next((shutil.which(c) for c in ("google-chrome", "chromium", "chromium-browser",
                                               "microsoft-edge") if shutil.which(c)), None)
+    if chrome is None:
+        sys.exit("needs google-chrome or chromium to print the PDF")
     with tempfile.TemporaryDirectory() as tmp:
         src = Path(tmp) / "guide.html"
         src.write_text(html, encoding="utf-8")
         if "--html" in sys.argv:
             shutil.copy(src, HERE / "easy_guide.html")
-            print("wrote", HERE / "easy_guide.html")
-        if chrome is None:
-            sys.exit("needs google-chrome or chromium to print the PDF")
         subprocess.run([chrome, "--headless=new", "--no-pdf-header-footer", "--disable-gpu",
                         f"--print-to-pdf={OUT}", src.as_uri()], check=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
