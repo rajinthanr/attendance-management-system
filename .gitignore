@@ -17,3 +17,6 @@ Companion/tests/
 fp-info-cache
 *-backups/
 _restore_backup_*/
+
+# The enclosure viewer's virtual environment (pyvista, manifold3d)
+Enclosure/.venv/
