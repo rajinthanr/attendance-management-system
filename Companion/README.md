@@ -254,8 +254,10 @@ with a `LASTCARD.TXT` that never sees a tap.
 
 `packaging/` turns the app into a standalone program (PyInstaller bundles
 Python and Qt, so the PC needs neither) and packs it as an installer. The
-results go in `dist/`; the work files in `build/` (both gitignored). Set the
-version with `VERSION=1.2.0` (Linux) or as the first argument (Windows).
+results go in `dist/`; the work files in `build/` (both gitignored, except the
+Windows installer, which is committed: **`dist/AttendanceLogger-Setup-1.0.0.exe`**
+is ready to download and run). Set the version with `VERSION=1.2.0` (Linux) or
+as the first argument (Windows).
 
 | Build | Command | Result |
 |---|---|---|

@@ -20,3 +20,8 @@ _restore_backup_*/
 
 # The enclosure viewer's virtual environment (pyvista, manifold3d)
 Enclosure/.venv/
+
+# AI assistant notes, kept local only
+CLAUDE.md
+AGENTS.md
+.claude/
