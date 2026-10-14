@@ -26,6 +26,7 @@ does not start; it says how to install it.
 
 | System | How |
 |---|---|
+| installed (see *Installers* below) | **Attendance Logger** in the Start menu or the applications menu; no Python needed |
 | Windows | double-click `start.bat` |
 | macOS, Linux | `sh start.sh` |
 | anywhere | `python attendance_qt.py` (with the `.venv` Python, or one that has PySide6); `python attendance_app.py` opens the window too |
@@ -248,6 +249,33 @@ window from opening on the same database.
 
 `python attendance_qt.py --demo` is the quickest way to check a change by hand: the demo device has every file a real one has,
 with a `LASTCARD.TXT` that never sees a tap.
+
+## Installers
+
+`packaging/` turns the app into a standalone program (PyInstaller bundles
+Python and Qt, so the PC needs neither) and packs it as an installer. The
+results go in `dist/`; the work files in `build/` (both gitignored). Set the
+version with `VERSION=1.2.0` (Linux) or as the first argument (Windows).
+
+| Build | Command | Result |
+|---|---|---|
+| Linux | `sh packaging/build_linux.sh` | `attendance-logger_<version>_<arch>.deb` (install with `sudo apt install ./attendance-logger_*.deb`; the app goes in `/opt/attendance-logger`, with a menu entry and an `attendance-logger` command) and a portable `attendance-logger-<version>-linux-<arch>.tar.gz` |
+| Windows, on Windows | `packaging\build_windows.bat` (needs Python 3 and [Inno Setup 6](https://jrsoftware.org/isinfo.php)) | `AttendanceLogger-Setup-<version>.exe` |
+| Windows, from Linux | `sh packaging/build_windows_docker.sh` (needs Docker; runs Windows Python, PyInstaller and Inno Setup under Wine in `tobix/pywine`) | `AttendanceLogger-Setup-<version>.exe` |
+
+GitHub builds both on its own servers
+(`.github/workflows/companion-installers.yml`) whenever `Companion/` changes:
+the files are under the run's *Artifacts* on the Actions tab. Pushing a tag
+such as `companion-v1.2.0` builds version 1.2.0 and attaches the installers to
+a GitHub release of that tag.
+
+The Windows setup installs for the current user without an admin prompt (it
+offers all users too), adds Start-menu entries for the app and its demo, and
+an optional desktop icon. Neither installer touches the database in
+`~/AttendanceLogger`, and uninstalling leaves it in place. A Linux build runs
+on distributions with the same or a newer glibc than the machine that built
+it, so build on the oldest one you need to support. The icon is drawn by
+`packaging/make_icons.py`, the same drawing as the window's.
 
 ## Troubleshooting
 

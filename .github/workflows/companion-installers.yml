@@ -1,0 +1,113 @@
+# Builds the Companion app's installers on GitHub's runners with the scripts in Companion/packaging/:
+#   Linux    attendance-logger_<version>_amd64.deb and a .tar.gz (built on Ubuntu 22.04, so it runs on glibc 2.35+)
+#   Windows  AttendanceLogger-Setup-<version>.exe (native Windows build, Inno Setup)
+# Every run keeps them as workflow artifacts. Pushing a tag companion-v1.2.3 builds version 1.2.3 and attaches the
+# files to a GitHub release of that tag. Other runs are numbered 1.0.<run number>.
+name: Companion installers
+
+on:
+  push:
+    # Naming tags without branches would limit pushes to tags; paths are not checked for tags.
+    branches: ["**"]
+    paths:
+      - "Companion/**"
+      - ".github/workflows/companion-installers.yml"
+    tags:
+      - "companion-v*"
+  pull_request:
+    paths:
+      - "Companion/**"
+      - ".github/workflows/companion-installers.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - id: v
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = tag ]; then v=${GITHUB_REF_NAME#companion-v}; else v=1.0.${GITHUB_RUN_NUMBER}; fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Version $v"
+
+  linux:
+    needs: version
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Qt's system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1 libfontconfig1 libxkbcommon0 \
+            libxkbcommon-x11-0 libxcb-cursor0 libdbus-1-3
+      - name: Build
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: sh Companion/packaging/build_linux.sh
+      - name: Smoke test (demo mode, offscreen)
+        run: |
+          set +e
+          QT_QPA_PLATFORM=offscreen timeout 10 Companion/build/linux-app/AttendanceLogger/AttendanceLogger --demo
+          rc=$?
+          [ "$rc" = 124 ] || { echo "The app exited with $rc instead of running"; exit 1; }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: attendance-logger-linux
+          path: |
+            Companion/dist/*.deb
+            Companion/dist/*.tar.gz
+          if-no-files-found: error
+
+  windows:
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+      - name: Build
+        shell: cmd
+        run: Companion\packaging\build_windows.bat ${{ needs.version.outputs.version }}
+      - name: Smoke test (demo mode)
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath Companion\build\windows-app\AttendanceLogger\AttendanceLogger.exe -ArgumentList "--demo" -PassThru
+          Start-Sleep -Seconds 15
+          if ($p.HasExited) { Write-Error "The app exited with $($p.ExitCode) instead of running"; exit 1 }
+          Stop-Process -Id $p.Id -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: attendance-logger-windows
+          path: Companion/dist/*.exe
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: [version, linux, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" out/* --repo "$GITHUB_REPOSITORY" \
+            --title "Attendance Logger ${{ needs.version.outputs.version }}" --generate-notes
