@@ -86,8 +86,10 @@ explains the app in full.
    Holding it for 5 s switches the device off. On battery it switches itself off
    after 3 minutes without a tap, or when the battery is flat.
 
+[`Firmware/docs/Attendance_Logger_Easy_Guide.pdf`](Firmware/docs/Attendance_Logger_Easy_Guide.pdf)
+is a five-page, picture-led guide to hand to lecturers;
 [`Firmware/docs/USER_GUIDE.md`](Firmware/docs/USER_GUIDE.md) explains the device
-for the people who run a class with it.
+in full for the people who run a class with it.
 
 ## Low power: measured
 
