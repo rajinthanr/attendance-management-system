@@ -89,6 +89,61 @@ explains the app in full.
 [`Firmware/docs/USER_GUIDE.md`](Firmware/docs/USER_GUIDE.md) explains the device
 for the people who run a class with it.
 
+## Low power: measured
+
+The logger spends almost all of its life in one of two low-power states, and
+draws large currents only for milliseconds per tap. **One charge of a 1000 mAh
+cell lasts about 17 months** at four 100-student lectures a day (27 months from
+the device's own draw; the rest is the cell's self-discharge).
+
+| State | Current (measured) | What is running |
+|---|---|---|
+| Switched off | **1.8 µA** | MCU in Standby with the RTC, reader powered down |
+| Switched on, waiting for cards | **108 µA** | MCU in Stop 2, reader in its own wake-up mode, 10 ms heartbeat flash every 5 s |
+| Reading a card | 202 mA for 12.2 ms | RF field on: REQA, anticollision, SELECT |
+| Buzz | 91 mA for 50 ms | vibration motor starting and running |
+| One whole tap | **10.3 mC (2.8 µAh)** | read, buzz and the LED pattern |
+| One 100-student lecture | 0.36 mAh | 100 taps plus the idle time |
+| For comparison: plain polling | 18.9 mA | reader polled every 100 ms instead of wake-up mode; 2 days per charge |
+
+The trick is the reader's wake-up mode. Instead of the MCU switching the
+13.56 MHz field on every 100 ms to look for a card (18.9 mA on average), the
+ST25R3916 measures its antenna by itself for about 0.7 ms every 100 ms and
+interrupts the MCU only when the reading changes. That is 175 times less
+current, and 91 % of what is left:
+
+![Idle current breakdown: reader wake-up mode 99 µA, heartbeat LED 5.5 µA, MCU in Stop 2 3.3 µA, MCU wake-ups 0.2 µA, battery sample 0.2 µA](Waveforms/power_idle.png)
+
+### Oscilloscope captures
+
+Measured on 8 October 2026 with a Tektronix TBS1052C across a 1 Ω shunt in the
+battery's negative lead (1 mV = 1 mA), each capture's offset removed. Steady
+currents (Standby, Stop 2, reader Ready) were read with a multimeter in series
+with the cell, using a power-test build that holds each load steady.
+
+**One wake-up measurement.** The reader's oscillator starts, the antenna is
+driven for 41 µs, and everything stops again: 9.9 µC, ten times a second, is
+99 µA on average.
+
+![Scope capture of one wake-up measurement: oscillator start at 13 mA for 0.4 ms, a 3.7 mA plateau, then a 94 mA spike for 41 µs](Waveforms/power_wakeup.png)
+
+**A card tap.** The measurement that sees the card wakes the MCU, which switches
+the field on to read the card (202 mA for 12.2 ms), then buzzes the motor and
+lights the green LED with the field off.
+
+![Scope capture of a card tap: 202 mA for 12.2 ms while reading, 91 mA average for the 50 ms buzz, then 9.2 mA for the reader and green LED](Waveforms/power_card_tap.png)
+
+**A false wake-up.** When the antenna reading strays without a card, one empty
+poll (5.7 ms) confirms it and the reader goes straight back to wake-up mode.
+The firmware learns from these and widens its window, so they stay rare.
+
+![Scope capture of a false wake-up: a 228 mA empty poll for 5.7 ms, then nothing until the next wake-up measurement 99 ms later](Waveforms/power_false_wakeup.png)
+
+The raw captures are `Waveforms/TEK0000{5,6,7}.CSV`; `python3 Waveforms/readme_plots.py`
+redraws these graphs, and [`Firmware/docs/Power_Estimation_Report.pdf`](Firmware/docs/Power_Estimation_Report.pdf)
+has the full analysis (every mode, wake-up timings, battery life and the cost
+of the unit).
+
 ### Files on the USB drive
 
 | File | Contents |
