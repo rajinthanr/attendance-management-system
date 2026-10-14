@@ -276,24 +276,9 @@ LICENSE              MIT
 
 ## Known issues
 
-- **Antenna not on the board yet.** Place AE3 in the antenna area, route its
-  feed, then tune the matching network and the RX capacitive divider against
-  the real coil (ST AN5276).
-- **Weak RX signal.** The reader's amplitude measurement read about 30 on the
-  bench, against a target of about 190; the RX dividers (10 pF over 150 pF) cut
-  too much. Try 15–33 pF for C38/C39.
-- **Charge current.** The PROG resistor is 1 kΩ, which sets 1 A. That's more than
-  the 500 mA a USB-C sink with plain 5.1 kΩ CC resistors may draw, and more than
-  the MSOP-10 charger can dissipate. Use at least 2 kΩ.
-- **Firmware limitations.** `Firmware/docs/ARCHITECTURE.md` lists them under
-  "Known limitations". The most important: start each lecture from the PC or
-  with a button hold; without a new lecture, a card already recorded in the
-  last 6 hours counts as a duplicate.
 - **External footprint library.** Some footprints come from a SnapEDA library at
   an absolute path outside the repository, so a fresh clone can't resolve them
   until the library is added or the paths are updated.
-- **PN532 placement.** A PN532 module plugged into its header sits close to the
-  ST25R3916 antenna and may detune it.
 
 ## License
 
