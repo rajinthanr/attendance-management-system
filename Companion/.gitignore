@@ -1,4 +1,6 @@
 __pycache__/
 *.pyc
 /build/
-/dist/
+/dist/*
+# The Windows installer is kept in the repo
+!/dist/*.exe
